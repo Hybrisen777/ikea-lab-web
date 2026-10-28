@@ -3,9 +3,9 @@
 // callouts, click-to-identify, x-ray), OrbitCamera + ZoomInput. Menus and settings: menu.js / settings.js. Format: README.md.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js';
-import { settings, speedLabel, SPEEDS } from './settings.js';
-import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js';
+import { createStage, srgb } from './stage.js?v=ffe20cd33d';
+import { settings, speedLabel, SPEEDS, asset } from './settings.js?v=ffe20cd33d';
+import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=ffe20cd33d';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -30,7 +30,7 @@ else {
   const entry = index.find(p => p.folder === folder);
   showLoading(entry?.name || folder);
   const useTwin = entry?.mode === 'twin' || (entry?.mode === 'both' && params.get('use') === '1');   // "both": the use phase
-  if (useTwin) await import('./twin.js').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
+  if (useTwin) await import('./twin.js?v=ffe20cd33d').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
   else await run(folder, entry).catch(fail);
 }
 
@@ -41,9 +41,9 @@ function fail(e) {
 }
 
 async function run(dir, entry) {
-  const sc = await (await fetch(dir + '/scenario.json')).json();
+  const sc = await (await fetch(asset(dir + '/scenario.json'))).json();
   if (sc.format !== 'ikea-lab-assembly') throw new Error('not an assembly scenario: ' + sc.format);
-  const gltf = await new GLTFLoader().loadAsync(dir + '/' + (sc.model || 'model.glb'));
+  const gltf = await new GLTFLoader().loadAsync(asset(dir + '/' + (sc.model || 'model.glb')));
   document.title = `${sc.product.name} - IKEA Product Lab`;
 
   // ---------------- renderer / scene / stage ----------------
@@ -77,7 +77,7 @@ async function run(dir, entry) {
   const pickables = parts.flatMap(p => p.meshes);
   const steps = sc.steps, S = steps.length;
   const total = sc.duration || (S ? steps[S - 1].start + steps[S - 1].duration : 0);
-  const pages = Object.fromEntries((sc.manualPages || []).map(p => [p.name, dir + '/' + p.file]));
+  const pages = Object.fromEntries((sc.manualPages || []).map(p => [p.name, asset(dir + '/' + p.file)]));
 
   const qa = new THREE.Quaternion(), qb = new THREE.Quaternion();
   // Linear / slerp between keys. Two keys at the same time = jump at a step boundary: the later key wins, except when

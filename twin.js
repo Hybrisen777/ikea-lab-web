@@ -4,13 +4,14 @@
 // QA: window.twin.runTrace(script) replays a parity script frame by frame exactly like Unity's TwinTraceRunner.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js';
-import { hideLoading, attachScenario, modal } from './menu.js';
-import { controlTypes, deviceTypes, richText, clamp, DEG, fmt0, TextLabel } from './twin-core.js';
+import { createStage, srgb } from './stage.js?v=ffe20cd33d';
+import { hideLoading, attachScenario, modal } from './menu.js?v=ffe20cd33d';
+import { asset } from './settings.js?v=ffe20cd33d';
+import { controlTypes, deviceTypes, richText, clamp, DEG, fmt0, TextLabel } from './twin-core.js?v=ffe20cd33d';
 
 /** Unity controller class -> module with its port. */
-const DEVICE_MODULES = { StarkvindController: './devices/starkvind.js', HobController: './devices/hob.js', DishwasherController: './devices/dishwasher.js', FinsmakareController: './devices/finsmakare.js', OvenController: './devices/oven.js', HoodController: './devices/hood.js',
-  MicrowaveController: './devices/microwave.js', DeskController: './devices/desk.js' };
+const DEVICE_MODULES = { StarkvindController: './devices/starkvind.js?v=ffe20cd33d', HobController: './devices/hob.js?v=ffe20cd33d', DishwasherController: './devices/dishwasher.js?v=ffe20cd33d', FinsmakareController: './devices/finsmakare.js?v=ffe20cd33d', OvenController: './devices/oven.js?v=ffe20cd33d', HoodController: './devices/hood.js?v=ffe20cd33d',
+  MicrowaveController: './devices/microwave.js?v=ffe20cd33d', DeskController: './devices/desk.js?v=ffe20cd33d' };
 
 const $ = id => document.getElementById(id);
 const TRACE_DT = 1 / 60;
@@ -19,12 +20,12 @@ const ORBIT_SPEED = 0.2, PAN_SPEED = 0.0015, CAM_MIN = 0.2, CAM_MAX = 4;      //
 const ZOOM_STEP = 0.15, ZOOM_SHARPNESS = 14;                                    // ZoomInput
 
 export async function runTwin(dir, entry) {
-  const tw = await (await fetch(dir + '/twin.json')).json();
+  const tw = await (await fetch(asset(dir + '/twin.json'))).json();
   if (tw.format !== 'ikea-lab-twin') throw new Error('not a twin export: ' + tw.format);
   const deviceComp = tw.components.find(c => DEVICE_MODULES[c.type]) || tw.components.find(c => /Controller$/.test(c.type));
   if (!deviceComp || !DEVICE_MODULES[deviceComp.type]) throw new Error(`${tw.product.name}: no web port of ${deviceComp?.type || 'its controller'} yet`);
   await import(DEVICE_MODULES[deviceComp.type]);
-  const gltf = await new GLTFLoader().loadAsync(dir + '/' + (tw.model || 'model.glb'));
+  const gltf = await new GLTFLoader().loadAsync(asset(dir + '/' + (tw.model || 'model.glb')));
   document.title = `${tw.product.name} - IKEA Product Lab`;
 
   // ---------------- stage ----------------
@@ -214,7 +215,7 @@ export async function runTwin(dir, entry) {
   }, { passive: false });
 
   // ---------------- UI (TwinUI) ----------------
-  const pages = (tw.manualPages || []).map(p => ({ name: p.name, src: dir + '/' + p.file }));
+  const pages = (tw.manualPages || []).map(p => ({ name: p.name, src: asset(dir + '/' + p.file) }));
   const ui = new TaskUI(tw, device, ctx, pages);
   $('twinHeader').textContent = `${(tw.product.name || 'DEVICE').toUpperCase()}  ·  DIGITAL TWIN`;
   $('help').innerHTML = richText(tw.help || '') + ' &nbsp; <b>M</b> manual &nbsp; <b>PgUp/PgDn</b> pages &nbsp; <b>Esc</b> menu &nbsp; <b>F8</b> report';

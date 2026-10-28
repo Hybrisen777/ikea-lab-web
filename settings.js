@@ -3,6 +3,10 @@
 export const SPEEDS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3];
 export const speedLabel = s => (Number.isInteger(s) ? s.toFixed(0) : String(s)) + '×';
 
+/** Data URL + the site build's version (public site: window.SITE_VERSION, set by the loader build_site.py writes into
+ *  player.html), so a browser never mixes cached files of two builds. Local runs: unchanged. */
+export const asset = url => window.SITE_VERSION ? url + (url.includes('?') ? '&' : '?') + 'v=' + window.SITE_VERSION : url;
+
 const KEY = 'ikeaLab.settings';
 const DEFAULTS = { speed: 1, continuous: false, autoCamera: true, xray: true };
 const listeners = [];

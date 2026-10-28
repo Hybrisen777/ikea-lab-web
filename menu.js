@@ -1,7 +1,7 @@
 // App-level UI of the web player (port of MenuUI + IssueReporter): main menu, product browser (search + type filter +
 // cards), in-scenario HUD (Report issue / Menu), pause menu (Esc), settings, issue report form (F8), loading, toasts.
 // The product list comes from index.json (written by Unity's web export), so new exports appear without code changes.
-import { settings, SPEEDS, speedLabel } from './settings.js';
+import { settings, SPEEDS, speedLabel, asset } from './settings.js?v=ffe20cd33d';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -26,7 +26,7 @@ let view = 'menu';        // menu | products | loading | scenario
 
 export async function loadIndex() {
   try {
-    const j = await (await fetch('index.json')).json();
+    const j = await (await fetch(asset('index.json'))).json();
     products = Array.isArray(j) ? j : (j.products || []);
     issuesUrl = (!Array.isArray(j) && j.issuesUrl) || '';
   } catch (e) { products = []; }
@@ -51,7 +51,7 @@ export function hideLoading() { $('loading').classList.add('hidden'); }
 function card(p) {
   const a = document.createElement('a'); a.className = 'card'; a.href = productUrl(p); a.setAttribute('aria-label', `${p.name}, ${modeLabel(p.mode)}`);
   const sub = (p.category ? p.category + '  ·  ' : '') + (isAssembly(p.mode) ? `${p.steps ?? '?'} steps` + (p.mode === 'both' ? ' + use' : '') : 'Interactive');
-  a.innerHTML = `<div class="thumb">${p.thumbnail ? `<img src="${esc(p.folder + '/' + p.thumbnail)}" alt="">` : `<span class="ph">${esc(p.name)}</span>`}
+  a.innerHTML = `<div class="thumb">${p.thumbnail ? `<img src="${esc(asset(p.folder + '/' + p.thumbnail))}" alt="">` : `<span class="ph">${esc(p.name)}</span>`}
       <span class="badge ${isAssembly(p.mode) ? 'asm' : 'twin'}">${esc(modeLabel(p.mode).toUpperCase())}</span></div>
     <div class="cbody"><b>${esc(p.name)}</b><span>${esc(sub)}</span><small>${esc(p.id)}</small></div>`;
   return a;
