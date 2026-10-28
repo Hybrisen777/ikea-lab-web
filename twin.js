@@ -4,14 +4,14 @@
 // QA: window.twin.runTrace(script) replays a parity script frame by frame exactly like Unity's TwinTraceRunner.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js?v=1b3df3769f';
-import { hideLoading, attachScenario, modal } from './menu.js?v=1b3df3769f';
-import { asset } from './settings.js?v=1b3df3769f';
-import { controlTypes, deviceTypes, richText, clamp, DEG, fmt0, TextLabel } from './twin-core.js?v=1b3df3769f';
+import { createStage, srgb } from './stage.js?v=2c83cece80';
+import { hideLoading, attachScenario, modal } from './menu.js?v=2c83cece80';
+import { asset } from './settings.js?v=2c83cece80';
+import { controlTypes, deviceTypes, richText, clamp, DEG, fmt0, TextLabel } from './twin-core.js?v=2c83cece80';
 
 /** Unity controller class -> module with its port. */
-const DEVICE_MODULES = { StarkvindController: './devices/starkvind.js?v=1b3df3769f', HobController: './devices/hob.js?v=1b3df3769f', DishwasherController: './devices/dishwasher.js?v=1b3df3769f', FinsmakareController: './devices/finsmakare.js?v=1b3df3769f', OvenController: './devices/oven.js?v=1b3df3769f', HoodController: './devices/hood.js?v=1b3df3769f',
-  MicrowaveController: './devices/microwave.js?v=1b3df3769f', DeskController: './devices/desk.js?v=1b3df3769f' };
+const DEVICE_MODULES = { StarkvindController: './devices/starkvind.js?v=2c83cece80', HobController: './devices/hob.js?v=2c83cece80', DishwasherController: './devices/dishwasher.js?v=2c83cece80', FinsmakareController: './devices/finsmakare.js?v=2c83cece80', OvenController: './devices/oven.js?v=2c83cece80', HoodController: './devices/hood.js?v=2c83cece80',
+  MicrowaveController: './devices/microwave.js?v=2c83cece80', DeskController: './devices/desk.js?v=2c83cece80' };
 
 const $ = id => document.getElementById(id);
 const TRACE_DT = 1 / 60;
