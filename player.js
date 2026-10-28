@@ -3,9 +3,9 @@
 // callouts, click-to-identify, x-ray), OrbitCamera + ZoomInput. Menus and settings: menu.js / settings.js. Format: README.md.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js?v=86501f37ca';
-import { settings, speedLabel, SPEEDS, asset } from './settings.js?v=86501f37ca';
-import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=86501f37ca';
+import { createStage, srgb } from './stage.js?v=6c4f3aae27';
+import { settings, speedLabel, SPEEDS, asset, BASE_RATE } from './settings.js?v=6c4f3aae27';
+import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=6c4f3aae27';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -30,7 +30,7 @@ else {
   const entry = index.find(p => p.folder === folder);
   showLoading(entry?.name || folder);
   const useTwin = entry?.mode === 'twin' || (entry?.mode === 'both' && params.get('use') === '1');   // "both": the use phase
-  if (useTwin) await import('./twin.js?v=86501f37ca').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
+  if (useTwin) await import('./twin.js?v=6c4f3aae27').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
   else await run(folder, entry).catch(fail);
 }
 
@@ -167,7 +167,7 @@ async function run(dir, entry) {
   }
   function advance(dt) {
     if (!st.playing || st.chapter === 0) return;
-    let t = st.local + dt * settings.speed * (st.reversing ? -1 : 1);
+    let t = st.local + dt * settings.speed * BASE_RATE * (st.reversing ? -1 : 1);
     const d = dur(st.chapter);
     if (!st.reversing && t >= d) {
       if (settings.continuous && st.chapter < S) { const over = t - d; setChapter(st.chapter + 1); t = Math.min(over, dur(st.chapter)); }
@@ -386,7 +386,7 @@ async function run(dir, entry) {
     fill: $('tl-fill'), stepMark: $('tl-step'), handle: $('tl-handle'), steptime: $('steptime'), total: $('total'),
     prev: $('prev'), rev: $('rev'), play: $('play'), next: $('next'), speed: $('speed'), pageBtn: $('pageBtn'),
     playIcon: $('playIcon'), callout: $('callout'), selCallout: $('selCallout') };
-  const fmt = t => { t = Math.max(0, t); const m = Math.floor(t / 60); return `${m}:${(t - m * 60).toFixed(1).padStart(4, '0')}`; };
+  const fmt = t => { t = Math.max(0, t) / BASE_RATE; const m = Math.floor(t / 60); return `${m}:${(t - m * 60).toFixed(1).padStart(4, '0')}`; };
   for (let c = 2; c <= S; c++) {
     const t = document.createElement('div'); t.className = 'tl-tick'; t.style.left = (start(c) / total * 100) + '%'; $('tl-ticks').appendChild(t);
   }

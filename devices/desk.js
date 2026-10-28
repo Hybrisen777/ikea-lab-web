@@ -2,7 +2,7 @@
 // parity_script.json + _unity_trace.json check it). Up / Down: short press (< 0.3 s) = 10 mm, long press = move
 // (71-118 cm). Handset sleeps after 15 s (first press only wakes it). Up + Down 3 s = child lock / unlock (mouse:
 // Shift+click pins one key, then hold the other). Down held 5 s at the bottom = reset (orange), release -> down and home.
-import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, roundToInt, uVec, ledHdr, ownMaterials } from '../twin-core.js?v=86501f37ca';
+import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, roundToInt, uVec, ledHdr, ownMaterials } from '../twin-core.js?v=6c4f3aae27';
 
 const f32 = Math.fround;
 

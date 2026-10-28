@@ -2,6 +2,9 @@
 // settings.on(fn) is called after any change with the changed key.
 export const SPEEDS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3];
 export const speedLabel = s => (Number.isInteger(s) ? s.toFixed(0) : String(s)) + '×';
+/** Timeline seconds per real second at 1× (AppSettings.BaseRate): 1× plays the baked timeline at a quarter of its bake
+ *  speed (tester feedback 2026-10-28). Exported tracks, ?t= and QA times stay in timeline seconds. */
+export const BASE_RATE = 0.25;
 
 /** Data URL + the site build's version (public site: window.SITE_VERSION, set by the loader build_site.py writes into
  *  player.html), so a browser never mixes cached files of two builds. Local runs: unchanged. */

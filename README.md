@@ -11,8 +11,9 @@ Nothing to install: open the link in a current desktop or mobile browser (Chrome
 ## What's inside
 
 **Assembly guides** - every step animated from the parts kit to the finished product, next to the matching page of the
-IKEA manual: ALEX drawer unit, BRIMNES wardrobe, IVAR cabinet, IVAR shelving, KALLAX, MALM bed, STEFAN chair,
-STORKLINTA chest of drawers, TROTTEN desk (crank).
+IKEA manual: ALEX drawer unit, BILLY bookcase, BRIMNES wardrobe, IVAR cabinet, IVAR shelving, KALLAX, LACK side table,
+MALM bed, MALM chest of 3 drawers, PAX / FORSAND wardrobe, ROSENTORP extendable table, STEFAN chair, STORKLINTA chest of
+drawers, TROTTEN desk (crank).
 
 **Digital twins** - working models of appliances with guided tasks from their user manuals: SMAKLIG and BLIXTSNABB
 induction hobs, FINSMAKARE (steam) and KULINARISK (pyrolytic) ovens, MATTRADITION oven and microwave, KALLBODA and

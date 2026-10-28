@@ -10,6 +10,15 @@
       "steps": 23
     },
     {
+      "folder": "BILLY_00263850",
+      "name": "BILLY",
+      "id": "002.638.50",
+      "category": "Bookcases & shelving units",
+      "mode": "assembly",
+      "thumbnail": "thumbnail.png",
+      "steps": 13
+    },
+    {
       "folder": "BLIXTSNABB_60467830",
       "name": "BLIXTSNABB hob",
       "id": "604.678.30",
@@ -91,6 +100,24 @@
       "steps": 8
     },
     {
+      "folder": "LACK_30449908",
+      "name": "LACK",
+      "id": "304.499.08",
+      "category": "Tables",
+      "mode": "assembly",
+      "thumbnail": "thumbnail.png",
+      "steps": 4
+    },
+    {
+      "folder": "MALM3_20403562",
+      "name": "MALM",
+      "id": "204.035.62",
+      "category": "Chests of drawers",
+      "mode": "assembly",
+      "thumbnail": "thumbnail.png",
+      "steps": 24
+    },
+    {
       "folder": "MALM_29931596",
       "name": "MALM bed",
       "id": "299.315.96",
@@ -116,6 +143,24 @@
       "mode": "twin",
       "thumbnail": "thumbnail.png",
       "steps": 7
+    },
+    {
+      "folder": "PAX_49502665",
+      "name": "PAX / FORSAND",
+      "id": "495.026.65",
+      "category": "Wardrobes",
+      "mode": "assembly",
+      "thumbnail": "thumbnail.png",
+      "steps": 18
+    },
+    {
+      "folder": "ROSENTORP_60568264",
+      "name": "ROSENTORP",
+      "id": "605.682.64",
+      "category": "Tables",
+      "mode": "assembly",
+      "thumbnail": "thumbnail.png",
+      "steps": 15
     },
     {
       "folder": "SMAKLIG_50467883",
