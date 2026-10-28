@@ -11,7 +11,7 @@ export const BASE_RATE = 0.25;
 export const asset = url => window.SITE_VERSION ? url + (url.includes('?') ? '&' : '?') + 'v=' + window.SITE_VERSION : url;
 
 const KEY = 'ikeaLab.settings';
-const DEFAULTS = { speed: 1, continuous: false, autoCamera: true, xray: true };
+const DEFAULTS = { speed: 1, continuous: false, autoCamera: true, xray: true, compactPanel: false };
 const listeners = [];
 let values = { ...DEFAULTS };
 try { values = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch (e) { /* storage blocked: defaults */ }
@@ -22,6 +22,8 @@ export const settings = {
   get continuous() { return values.continuous; },
   get autoCamera() { return values.autoCamera; },
   get xray() { return values.xray; },
+  /** Step panel collapsed to name + timeline + transport (web only - mainly for phones). */
+  get compactPanel() { return values.compactPanel; },
   set(key, v) {
     if (key === 'speed') v = Math.min(4, Math.max(0.1, v));
     if (values[key] === v) return;

@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IKEA Product Lab Player</title>
 <!-- ?bench=1: load time / fps overlay (same script as in the Unity WebGL comparison build) -->
-<script>if (/[?&]bench=1/.test(location.search)) document.write('<script src="bench.js?v=6c4f3aae27"><\/script>');</script>
+<script>if (/[?&]bench=1/.test(location.search)) document.write('<script src="bench.js?v=1b3df3769f"><\/script>');</script>
 <!-- three.js pinned to an exact version; no build step -->
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <style>
@@ -18,8 +18,16 @@ canvas{display:block;touch-action:none;outline:none}
 .hidden{display:none!important}
 
 /* step panel (top-left) */
-#panel{position:fixed;left:16px;top:16px;width:min(380px,calc(100vw - 32px));background:rgba(255,255,255,.95);padding:13px 15px 14px;
+#panel{position:fixed;z-index:2;left:16px;top:16px;width:min(380px,calc(100vw - 32px));background:rgba(255,255,255,.95);padding:13px 15px 14px;
   display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 4px rgba(0,0,0,.08);max-height:calc(100vh - 32px);overflow:auto}
+#headRow{display:flex;align-items:center;gap:8px}
+#headRow #header{flex:1;min-width:0}
+#textBtn{border:0;background:var(--btn);color:var(--ink);font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  height:26px;min-width:34px;padding:0 8px;flex:none}
+#textBtn:hover{background:var(--btn-hover)}
+/* collapsed step panel (T / the arrow button): step name, timeline and transport only */
+#panel.compact #body,#panel.compact #times{display:none}
+#panel.compact #title{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #header,#twinHeader{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--blue)}
 #title{font-size:21px;font-weight:700;line-height:1.2}
 #body{font-size:15px;line-height:1.45;color:#333}
@@ -101,7 +109,7 @@ canvas{display:block;touch-action:none;outline:none}
 .accent{background:var(--yellow);height:5px}
 
 /* main menu */
-#menu{position:fixed;inset:0;background:var(--bg);display:flex;overflow:auto}
+#menu{position:fixed;inset:0;z-index:8;background:var(--bg);display:flex;overflow:auto}
 #menu .left{flex:0 0 44%;display:flex;flex-direction:column;justify-content:center;gap:11px;padding:40px 40px 60px 72px;box-sizing:border-box}
 #menu .left .accent{width:62px;height:7px}
 #menu h1{margin:0;font-size:clamp(34px,4vw,50px);color:var(--blue);line-height:1.1}
@@ -264,7 +272,7 @@ canvas{display:block;touch-action:none;outline:none}
 <div id="toast" class="hidden"></div>
 
 <div id="panel" class="hidden">
-  <div id="header"></div>
+  <div id="headRow"><div id="header"></div><button id="textBtn" title="Hide step text (T)" aria-label="Hide step text">▲</button></div>
   <div id="title"></div>
   <div id="body"></div>
   <div id="timeline"><div id="tl-bg"><div id="tl-step"></div><div id="tl-fill"></div><div id="tl-ticks"></div></div><div id="tl-handle"></div></div>
@@ -295,13 +303,13 @@ canvas{display:block;touch-action:none;outline:none}
 <div id="page" class="hidden"><img id="pageImg" alt="Manual page"><div id="pageNav" class="hidden"><button id="pagePrev" aria-label="Previous page">‹</button><span id="pageLabel"></span><button id="pageNext" aria-label="Next page">›</button></div></div>
 <div id="callout" class="callout hidden"></div>
 <div id="selCallout" class="callout hidden"></div>
-<div id="help" class="hidden"><b>Space</b> play/pause &nbsp; <b>J K L</b> reverse/pause/play &nbsp; <b>← →</b> step &nbsp; <b>, .</b> frame &nbsp; <b>− +</b> speed &nbsp; <b>R</b> replay &nbsp; <b>Home</b> parts &nbsp; <b>M</b> page &nbsp; <b>Click</b> identify part &nbsp; <b>F</b> focus &nbsp; <b>C</b> auto camera &nbsp; <b>X</b> x-ray &nbsp; <b>Drag</b> orbit &nbsp; <b>Wheel</b> zoom &nbsp; <b>Middle / Shift-drag</b> pan &nbsp; <b>Esc</b> menu &nbsp; <b>F8</b> report</div>
+<div id="help" class="hidden"><b>Space</b> play/pause &nbsp; <b>J K L</b> reverse/pause/play &nbsp; <b>← →</b> step &nbsp; <b>, .</b> frame &nbsp; <b>− +</b> speed &nbsp; <b>R</b> replay &nbsp; <b>Home</b> parts &nbsp; <b>M</b> page &nbsp; <b>T</b> step text &nbsp; <b>Click</b> identify part &nbsp; <b>F</b> focus &nbsp; <b>C</b> auto camera &nbsp; <b>X</b> x-ray &nbsp; <b>Drag</b> orbit &nbsp; <b>Wheel</b> zoom &nbsp; <b>Middle / Shift-drag</b> pan &nbsp; <b>Esc</b> menu &nbsp; <b>F8</b> report</div>
 
 <script>
 // build_site.py: load this build's modules only if this page is the current build. GitHub Pages lets browsers cache
 // every file for 10 min, so after an update a cached player.html could otherwise run next to newer modules.
 (function () {
-  var V = '6c4f3aae27', q = new URLSearchParams(location.search);
+  var V = '1b3df3769f', q = new URLSearchParams(location.search);
   function go() { window.SITE_VERSION = V; var s = document.createElement('script'); s.type = 'module'; s.src = 'player.js?v=' + V; document.body.appendChild(s); }
   fetch('version.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
     if (j.v !== V && q.get('_v') !== j.v) { q.set('_v', j.v); location.replace(location.pathname + '?' + q); }   // a fresh URL = a fresh page

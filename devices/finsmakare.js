@@ -4,7 +4,7 @@
 // (hold 3 s = light), Temperature (hold 3 s = Fast Heat Up), Minute Minder; water drawer (900 ml) for steam
 // functions; pyrolytic cleaning locks the door. Cavity temperature and clocks run at simSpeed x real time.
 import * as THREE from 'three';
-import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, roundToInt, uVec, uAxisAngle, srgbLerp } from '../twin-core.js?v=6c4f3aae27';
+import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, roundToInt, uVec, uAxisAngle, srgbLerp } from '../twin-core.js?v=1b3df3769f';
 
 const f32 = Math.fround;
 const fn = (id, name, def, min, max, o = {}) => ({ id, name, def, min, max, fan: !!o.fan, grill: !!o.grill, steam: !!o.steam, heats: o.heats !== false });

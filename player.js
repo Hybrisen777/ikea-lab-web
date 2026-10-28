@@ -3,9 +3,9 @@
 // callouts, click-to-identify, x-ray), OrbitCamera + ZoomInput. Menus and settings: menu.js / settings.js. Format: README.md.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js?v=6c4f3aae27';
-import { settings, speedLabel, SPEEDS, asset, BASE_RATE } from './settings.js?v=6c4f3aae27';
-import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=6c4f3aae27';
+import { createStage, srgb } from './stage.js?v=1b3df3769f';
+import { settings, speedLabel, SPEEDS, asset, BASE_RATE } from './settings.js?v=1b3df3769f';
+import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=1b3df3769f';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -30,7 +30,7 @@ else {
   const entry = index.find(p => p.folder === folder);
   showLoading(entry?.name || folder);
   const useTwin = entry?.mode === 'twin' || (entry?.mode === 'both' && params.get('use') === '1');   // "both": the use phase
-  if (useTwin) await import('./twin.js?v=6c4f3aae27').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
+  if (useTwin) await import('./twin.js?v=1b3df3769f').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
   else await run(folder, entry).catch(fail);
 }
 
@@ -427,11 +427,19 @@ async function run(dir, entry) {
     $('useBtn').classList.toggle('hidden', !canUse());
   }
   const toggleManual = () => { st.showPage = !st.showPage; stepDirty = true; };
+  // step text on / off (the panel covers much of a phone screen); remembered in settings
+  const textBtn = $('textBtn');
+  function refreshCompact() {
+    const c = settings.compactPanel; ui.panel.classList.toggle('compact', c);
+    textBtn.textContent = c ? '▼' : '▲'; textBtn.title = c ? 'Show step text (T)' : 'Hide step text (T)'; textBtn.setAttribute('aria-label', textBtn.title);
+  }
+  const toggleText = () => settings.set('compactPanel', !settings.compactPanel);
+  settings.on(k => { if (k === 'compactPanel') refreshCompact(); }); refreshCompact();
   const stepSpeed = d => settings.stepSpeed(d);
   const cycleSpeed = () => { const i = SPEEDS.findIndex(s => s > settings.speed + 1e-3); settings.set('speed', i >= 0 ? SPEEDS[i] : SPEEDS[0]); };
   const btn = (b, f) => b.addEventListener('click', () => { f(); b.blur(); });
   btn(ui.prev, previous); btn(ui.rev, () => st.reversing ? pause() : playReverse()); btn(ui.play, togglePlay); btn(ui.next, next);
-  btn(ui.speed, cycleSpeed); btn(ui.pageBtn, toggleManual);
+  btn(ui.speed, cycleSpeed); btn(ui.pageBtn, toggleManual); btn(textBtn, toggleText);
   // "both" products: once the last step has finished, switch to the digital twin (AssemblyUI "Assembled - now use it")
   function canUse() { return entry?.mode === 'both' && st.chapter === S && atEnd(); }
   function useIt() { if (canUse()) location.href = `player.html?p=${encodeURIComponent(dir)}&use=1`; }
@@ -451,7 +459,7 @@ async function run(dir, entry) {
     const k = e.key, handled = {
       ' ': togglePlay, ArrowRight: next, ArrowLeft: previous, j: playReverse, k: pause, l: play,
       ',': () => stepFrame(-1), '.': () => stepFrame(1), r: replay, Home: restart, '-': () => stepSpeed(-1), '=': () => stepSpeed(1), '+': () => stepSpeed(1),
-      m: toggleManual, c: () => settings.set('autoCamera', !settings.autoCamera), x: () => settings.set('xray', !settings.xray),
+      m: toggleManual, t: toggleText, c: () => settings.set('autoCamera', !settings.autoCamera), x: () => settings.set('xray', !settings.xray),
       f: () => { st.selFraming = true; st.userControlled = false; },
       u: useIt,
     }[k.length === 1 ? k.toLowerCase() : k];
