@@ -1,0 +1,193 @@
+{
+    "products": [
+        {
+            "folder": "ALEX_00473546",
+            "name": "ALEX",
+            "id": "004.735.46",
+            "category": "Drawer units",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 23
+        },
+        {
+            "folder": "BLIXTSNABB_60467830",
+            "name": "BLIXTSNABB hob",
+            "id": "604.678.30",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 9
+        },
+        {
+            "folder": "BRIMNES_40407922",
+            "name": "BRIMNES wardrobe",
+            "id": "404.079.22",
+            "category": "Wardrobes",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 11
+        },
+        {
+            "folder": "FINSMAKARE_50411730",
+            "name": "FINSMAKARE oven",
+            "id": "504.117.30",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 8
+        },
+        {
+            "folder": "IVARCAB_40033763",
+            "name": "IVAR cabinet",
+            "id": "400.337.63",
+            "category": "Cabinets",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 8
+        },
+        {
+            "folder": "IVAR6_09631216",
+            "name": "IVAR shelving",
+            "id": "096.312.16",
+            "category": "Shelving units",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 7
+        },
+        {
+            "folder": "KALLAX_80275887",
+            "name": "KALLAX",
+            "id": "802.758.87",
+            "category": "Shelving units",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 12
+        },
+        {
+            "folder": "KALLBODA_70548063",
+            "name": "KALLBODA dishwasher",
+            "id": "705.480.63",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 13
+        },
+        {
+            "folder": "KNUVEBO_70615632",
+            "name": "KNUVEBO extractor hood",
+            "id": "706.156.32",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 9
+        },
+        {
+            "folder": "KULINARISK_70421059",
+            "name": "KULINARISK oven",
+            "id": "704.210.59",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 8
+        },
+        {
+            "folder": "MALM_29931596",
+            "name": "MALM bed",
+            "id": "299.315.96",
+            "category": "Beds",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 8
+        },
+        {
+            "folder": "MATTRADITION_10411770",
+            "name": "MATTRADITION",
+            "id": "104.117.70",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 6
+        },
+        {
+            "folder": "MATTRADITIONOVEN_80411724",
+            "name": "MATTRADITION oven",
+            "id": "804.117.24",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 7
+        },
+        {
+            "folder": "SMAKLIG_50467883",
+            "name": "SMAKLIG hob",
+            "id": "504.678.83",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 9
+        },
+        {
+            "folder": "STARKVIND_50461942",
+            "name": "STARKVIND air purifier",
+            "id": "504.619.42",
+            "category": "Air purifiers",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 11
+        },
+        {
+            "folder": "STARKVINDTABLE_80501951",
+            "name": "STARKVIND table with air purifier",
+            "id": "805.019.51",
+            "category": "Air purifiers",
+            "mode": "both",
+            "thumbnail": "thumbnail.png",
+            "steps": 8
+        },
+        {
+            "folder": "STEFAN_00211088",
+            "name": "STEFAN",
+            "id": "002.110.88",
+            "category": "Chairs",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 10
+        },
+        {
+            "folder": "STORKLINTA_70627545",
+            "name": "STORKLINTA",
+            "id": "706.275.45",
+            "category": "Chests of drawers",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 13
+        },
+        {
+            "folder": "TORSBODA_40548088",
+            "name": "TORSBODA dishwasher",
+            "id": "405.480.88",
+            "category": "Kitchen appliances",
+            "mode": "twin",
+            "thumbnail": "thumbnail.png",
+            "steps": 13
+        },
+        {
+            "folder": "TROTTENCRANK_79429602",
+            "name": "TROTTEN desk (crank)",
+            "id": "794.296.02",
+            "category": "Desks",
+            "mode": "assembly",
+            "thumbnail": "thumbnail.png",
+            "steps": 9
+        },
+        {
+            "folder": "TROTTENELEC_49621871",
+            "name": "TROTTEN desk sit/stand (electric)",
+            "id": "496.218.71",
+            "category": "Desks",
+            "mode": "both",
+            "thumbnail": "thumbnail.png",
+            "steps": 8
+        }
+    ]
+}

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IKEA Product Lab Player</title>
+<!-- ?bench=1: load time / fps overlay (same script as in the Unity WebGL comparison build) -->
+<script>if (/[?&]bench=1/.test(location.search)) document.write('<script src="bench.js"><\/script>');</script>
+<!-- three.js pinned to an exact version; no build step -->
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+<style>
+:root{--blue:#0051a3;--yellow:#ffd91a;--ink:#1f1f1f;--btn:#ebebeb;--btn-hover:#d6e0f2;--btn-active:#c7dbf7;--hl:#ffb800}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#edede9;font-family:"Noto Sans","Segoe UI",system-ui,sans-serif;color:var(--ink)}
+canvas{display:block;touch-action:none;outline:none}
+#view{position:fixed;inset:0}
+.hidden{display:none!important}
+
+/* step panel (top-left) */
+#panel{position:fixed;left:16px;top:16px;width:min(380px,calc(100vw - 32px));background:rgba(255,255,255,.95);padding:13px 15px 14px;
+  display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 4px rgba(0,0,0,.08);max-height:calc(100vh - 32px);overflow:auto}
+#header,#twinHeader{font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--blue)}
+#title{font-size:21px;font-weight:700;line-height:1.2}
+#body{font-size:15px;line-height:1.45;color:#333}
+#body b{color:var(--ink)}
+
+/* timeline */
+#timeline{position:relative;height:20px;cursor:pointer;touch-action:none}
+#tl-bg{position:absolute;left:0;right:0;top:6px;height:8px;background:#dbdbdb}
+#tl-step{position:absolute;top:0;bottom:0;background:rgba(255,217,26,.75)}
+#tl-fill{position:absolute;left:0;top:0;bottom:0;background:rgba(0,82,163,.8)}
+.tl-tick{position:absolute;top:1px;bottom:1px;width:2px;margin-left:-1px;background:#fff}
+#tl-handle{position:absolute;top:0;bottom:0;width:4px;margin-left:-2px;background:var(--ink)}
+#timeline:hover #tl-handle{background:var(--blue)}
+#times{display:flex;justify-content:space-between;font-size:12px;color:#4d4d4d;white-space:nowrap}
+#total{color:#737373}
+
+/* transport */
+#transport{display:flex;gap:6px;height:34px}
+#transport button{border:0;background:var(--btn);color:var(--ink);font:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;padding:0 8px;min-width:36px}
+#transport button:hover{background:var(--btn-hover)}
+#transport button:disabled{opacity:.45;cursor:default;background:var(--btn)}
+#transport button.on{background:var(--btn-active)}
+#transport button.primary{background:var(--yellow);min-width:48px}
+#transport button.primary:hover{background:#ffe659}
+#transport svg{width:16px;height:16px;fill:var(--ink)}
+#transport .spacer{flex:1}
+#speed{min-width:48px}
+#pageBtn{min-width:80px}
+#useBtn{border:0;background:var(--yellow);color:var(--ink);font:inherit;font-size:14px;font-weight:700;height:38px;cursor:pointer}
+#useBtn:hover{background:#ffe659}
+
+/* manual page (bottom-right) */
+#page{position:fixed;right:16px;bottom:16px;background:#fff;padding:7px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+#page img{display:block;height:min(58vh,620px);max-width:min(30vw,440px);object-fit:contain}
+
+/* callouts */
+.callout{position:fixed;left:0;top:0;background:var(--hl);color:#1a1a1a;font-weight:700;font-size:15px;padding:4px 9px;white-space:nowrap;
+  pointer-events:none;transform:translate(-50%,-100%);will-change:transform}
+
+/* digital twin panel (TwinUI): status, guided task, page navigation, hover tooltip */
+#twinPanel{position:fixed;left:16px;top:16px;width:min(380px,calc(100vw - 32px));background:rgba(255,255,255,.95);padding:13px 15px 14px;
+  display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.08);max-height:calc(100vh - 32px);overflow:auto}
+#twinStatus{font-size:15px;line-height:1.5;color:var(--ink)}
+#taskBox{display:flex;flex-direction:column;gap:5px;border-top:2px solid #d9d9d9;padding-top:8px;margin-top:2px}
+#taskHeader{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--blue)}
+#taskTitle{font-size:19px;font-weight:700;line-height:1.2}
+#taskText{font-size:14px;line-height:1.45;color:#404040}
+#taskResult{font-size:14px;font-weight:700;color:#1a8c40;min-height:1em}
+#taskProgress{height:6px;background:#e0e0e0}#taskFill{height:100%;width:0;background:var(--blue);transition:width .3s}
+#taskButtons{display:flex;gap:6px}
+#taskButtons button{flex:1;border:0;background:var(--btn);color:var(--ink);font:inherit;font-size:13px;font-weight:700;height:32px;cursor:pointer}
+#taskButtons button:hover{background:var(--btn-hover)} #taskButtons button:disabled{opacity:.45;cursor:default}
+#pageNav{display:flex;align-items:center;justify-content:center;gap:8px;padding-top:6px;font-size:13px;font-weight:700}
+#pageNav button{border:0;background:var(--btn);font:inherit;font-size:18px;width:40px;height:30px;cursor:pointer}
+#tip{position:fixed;left:0;top:0;background:var(--yellow);color:var(--ink);font-weight:700;font-size:14px;padding:4px 9px;white-space:nowrap;pointer-events:none;z-index:6}
+
+/* key help (bottom-left) */
+#help{position:fixed;left:16px;bottom:10px;background:rgba(255,255,255,.8);font-size:11px;color:#404040;padding:3px 7px;white-space:nowrap;
+  max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+#help b{color:var(--ink)}
+
+#status{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-size:15px;color:#555}
+#status.error{color:#a00;max-width:80vw}
+
+/* ---------- app UI (MenuUI); colours from UIKit ---------- */
+:root{--bg:#f2f2f0;--line:#d9d9d6;--muted:#66696e;--dim:rgba(0,0,0,.55);--blue-dark:#003d80}
+.btn{border:0;font:inherit;font-weight:700;font-size:15px;height:40px;padding:0 18px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  text-decoration:none;color:var(--ink);background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);white-space:nowrap;box-sizing:border-box}
+.btn:hover{background:#e6edfa}.btn:active{background:#ccdbf2}
+.btn.primary{background:var(--yellow);box-shadow:none}.btn.primary:hover{background:#ffe659}.btn.primary:active{background:#e6bf0d}
+.btn.blue{background:var(--blue);color:#fff;box-shadow:none}.btn.blue:hover{background:#1a6bc2}.btn.blue:active{background:var(--blue-dark)}
+.btn.ghost{background:transparent;box-shadow:none}.btn.ghost:hover{background:rgba(0,0,0,.06)}
+.chip{border:0;font:inherit;font-weight:700;font-size:13px;height:32px;padding:0 12px;cursor:pointer;background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.chip:hover{background:#e6edfa}.chip.on{background:var(--blue);color:#fff;box-shadow:none}.chip.on:hover{background:#1a6bc2}.chip:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:6px}
+.label{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--muted);margin-top:4px}
+.hint{font-size:12px;color:var(--muted)}
+.accent{background:var(--yellow);height:5px}
+
+/* main menu */
+#menu{position:fixed;inset:0;background:var(--bg);display:flex;overflow:auto}
+#menu .left{flex:0 0 44%;display:flex;flex-direction:column;justify-content:center;gap:11px;padding:40px 40px 60px 72px;box-sizing:border-box}
+#menu .left .accent{width:62px;height:7px}
+#menu h1{margin:0;font-size:clamp(34px,4vw,50px);color:var(--blue);line-height:1.1}
+#menu .tagline{font-size:17px;color:var(--muted);max-width:400px;margin:0 0 14px}
+#menu .left .btn{width:min(280px,100%);height:36px}
+#menu .left .btn.blue{height:40px}
+#menu .right{flex:1;margin-left:4%;background:var(--blue);display:flex;flex-direction:column;justify-content:center;gap:15px;padding:40px 52px;box-sizing:border-box}
+#menu .right .label{color:rgba(255,255,255,.75);font-size:12px}
+#menu .right .btn{align-self:flex-start}
+#featured{display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:16px}
+#menuFooter{position:fixed;left:72px;bottom:18px;font-size:12px;color:var(--muted);white-space:pre}
+
+/* product cards */
+.card{display:flex;flex-direction:column;background:#fff;color:var(--ink);text-decoration:none;min-width:0}
+.card:hover{background:#edf2ff}
+.card .thumb{position:relative;aspect-ratio:340/200;background:#edede9;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.card .thumb img{width:100%;height:100%;object-fit:contain}
+.card .thumb .ph{font-size:22px;font-weight:700;color:#b3b3b3}
+.badge{position:absolute;left:8px;top:8px;font-size:10px;font-weight:700;letter-spacing:.12em;padding:3px 7px}
+.badge.asm{background:var(--yellow);color:var(--ink)}.badge.twin{background:var(--blue);color:#fff}
+.cbody{display:flex;flex-direction:column;gap:1px;padding:9px 12px 11px}
+.cbody b{font-size:17px}.cbody span{font-size:12px;color:var(--muted)}.cbody small{font-size:11px;color:#8c8c91;margin-top:2px}
+
+/* product browser */
+#products{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column}
+#products .top{flex:0 0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;padding:12px 26px;border-bottom:1.5px solid var(--line)}
+#products h2{margin:0 10px 0 0;font-size:26px}
+#search{font:inherit;font-size:14px;height:36px;width:min(300px,100%);padding:0 12px;border:0;background:#f7f7f7;box-shadow:inset 0 0 0 1.5px var(--line);outline:none}
+#search:focus{box-shadow:inset 0 0 0 2px var(--blue)}
+#products .spacer{flex:1}
+#count{font-size:12px;color:var(--muted)}
+#grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,220px));gap:17px;padding:24px 26px 40px;align-content:start}
+#empty{position:absolute;left:0;right:0;top:45%;text-align:center;color:var(--muted);font-size:16px}
+
+/* HUD + modals */
+#hud{position:fixed;right:16px;top:16px;display:flex;gap:7px}
+#hud .btn{height:31px;font-size:12px;padding:0 13px}
+.modal{position:fixed;inset:0;background:var(--dim);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.modal .box{background:#fff;width:100%;display:flex;flex-direction:column;gap:8px;padding:24px 26px 26px;max-height:100%;overflow:auto;box-sizing:border-box}
+.modal h3{margin:0;font-size:24px}
+.modal .sub{font-size:13px;color:var(--muted);margin-bottom:6px}
+#pause .box{max-width:340px}#pause .btn{width:100%}
+#settings .box{max-width:470px}
+#report .box{max-width:580px}
+.modal .buttons{display:flex;justify-content:flex-end;gap:7px;margin-top:6px}
+#report .head{display:flex;align-items:center;gap:8px}#report .head i{display:block;width:5px;height:24px;background:var(--yellow)}
+#reportWhere{font-size:13px;font-weight:700;color:var(--blue)}
+#report .shotrow{display:flex;gap:12px;align-items:flex-start}
+#shotFrame{flex:0 0 200px;aspect-ratio:16/9;background:var(--line);padding:1px}#shotImg{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+#report .shotcol{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+#report input,#report textarea{font:inherit;font-size:14px;border:0;background:#f7f7f7;box-shadow:inset 0 0 0 1.5px var(--line);padding:8px 10px;outline:none;width:100%;box-sizing:border-box}
+#report input:focus,#report textarea:focus{box-shadow:inset 0 0 0 2px var(--blue)}
+#report textarea{height:96px;resize:vertical}
+#repError{color:#bf1a1a;font-weight:700;font-size:13px;min-height:1em}
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--blue);z-index:20}
+#toast{position:fixed;left:50%;bottom:46px;transform:translateX(-50%);background:rgba(31,31,33,.94);color:#fff;font-weight:700;font-size:13px;padding:9px 17px;z-index:30;
+  transition:opacity .4s;pointer-events:none;max-width:calc(100vw - 32px)}
+#toast.fade{opacity:0}
+
+@media (max-width:760px){
+  #page img{height:34vh;max-width:40vw}
+  #help{display:none}
+  #title{font-size:18px} #body{font-size:14px}
+  #panel,#twinPanel{top:56px;max-height:calc(100vh - 72px)}
+  #menu{flex-direction:column}
+  #menu .left{flex:none;padding:40px 20px 24px}
+  #menu .right{margin:0;padding:24px 20px 60px}
+  #menuFooter{position:static;padding:0 20px 20px;white-space:normal}
+  #featured{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:16px}
+  #products .top{padding:10px 16px}
+  #pReport{display:none!important}
+  #report .shotrow{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div id="status" class="hidden"></div>
+<div id="loading">Loading…</div>
+
+<!-- main menu -->
+<div id="menu" class="hidden">
+  <div class="left">
+    <div class="accent"></div>
+    <h1>Product Lab</h1>
+    <p class="tagline">Step-by-step 3D assembly instructions and interactive digital twins of IKEA products.</p>
+    <a id="mBrowse" class="btn blue" href="player.html?view=products">Browse products</a>
+    <button id="mReport" class="btn">Report an issue</button>
+    <button id="mSettings" class="btn">Settings</button>
+  </div>
+  <div class="right">
+    <div class="label">PRODUCTS</div>
+    <div id="featured"></div>
+    <a id="mAll" class="btn primary" href="player.html?view=products">See all products &nbsp;›</a>
+  </div>
+  <div id="menuFooter"></div>
+</div>
+
+<!-- product browser -->
+<div id="products" class="hidden">
+  <div class="top">
+    <a id="pBack" class="btn ghost" href="player.html">‹ &nbsp;Menu</a>
+    <h2>Products</h2>
+    <input id="search" type="search" placeholder="Search name, article number or category" aria-label="Search products">
+    <div id="filters" class="row"></div>
+    <span class="spacer"></span>
+    <span id="count"></span>
+    <button id="pReport" class="btn">Report an issue</button>
+  </div>
+  <div id="grid"></div>
+  <div id="empty" class="hidden">No products match your search.</div>
+</div>
+
+<!-- in-scenario HUD -->
+<div id="hud" class="hidden"><button id="hudReport" class="btn primary">Report issue &nbsp;(F8)</button><button id="hudMenu" class="btn">Menu &nbsp;(Esc)</button></div>
+
+<!-- pause menu (Esc) -->
+<div id="pause" class="modal hidden"><div class="box">
+  <div class="accent"></div>
+  <h3 id="pauseTitle"></h3><div id="pauseSub" class="sub"></div>
+  <button id="pzResume" class="btn blue">Resume</button>
+  <button id="pzReport" class="btn primary">Report an issue</button>
+  <button id="pzRestart" class="btn">Restart scenario</button>
+  <a id="pzProducts" class="btn" href="player.html?view=products">Choose another product</a>
+  <button id="pzSettings" class="btn">Settings</button>
+  <a id="pzMenu" class="btn ghost" href="player.html">Main menu</a>
+</div></div>
+
+<!-- settings -->
+<div id="settings" class="modal hidden"><div class="box">
+  <div class="accent"></div>
+  <h3>Settings</h3>
+  <div class="label">ANIMATION SPEED</div><div id="setSpeed" class="row"></div>
+  <div class="hint">Also on the step panel (speed button) and with the − / + keys.</div>
+  <div class="label">PLAYBACK</div><div id="setPlay" class="row"></div>
+  <div class="label">CAMERA</div><div id="setCam" class="row"></div>
+  <div class="hint">Toggle any time with C. Orbiting or zooming pauses the follow camera until the next step.</div>
+  <div class="label">HIDDEN PARTS</div><div id="setXray" class="row"></div>
+  <div class="hint">Small parts of the current step stay visible as a yellow ghost when something hides them. Toggle with X.</div>
+  <div class="buttons"><button id="setDone" class="btn blue">Done</button></div>
+</div></div>
+
+<!-- issue report (F8) -->
+<div id="report" class="modal hidden"><div class="box">
+  <div class="head"><i></i><h3>Report an issue</h3></div>
+  <div id="reportWhere"></div>
+  <div class="shotrow"><div id="shotFrame"><img id="shotImg" alt="Screenshot"></div>
+    <div class="shotcol"><button id="shotToggle" class="chip">Screenshot attached</button><span id="shotNote" class="hint"></span></div></div>
+  <div class="label">TYPE</div><div id="repCats" class="row"></div>
+  <div class="label">SEVERITY</div><div id="repSevs" class="row"></div>
+  <div class="label">TITLE</div><input id="repTitle" maxlength="120" placeholder="Short summary, e.g. &quot;Seat goes through the table in step 7&quot;">
+  <div class="label">WHAT HAPPENED?</div><textarea id="repDesc" maxlength="4000" placeholder="What did you do, what did you expect, and what happened instead?"></textarea>
+  <div class="label">YOUR NAME (OPTIONAL)</div><input id="repName" maxlength="80" placeholder="So we can ask follow-up questions">
+  <div class="hint">The report is saved as a .json file in your downloads folder - send it to the team.</div>
+  <div id="repError"></div>
+  <div class="buttons"><button id="repCancel" class="btn">Cancel &nbsp;(Esc)</button><button id="repSubmit" class="btn primary">Submit report</button></div>
+</div></div>
+<div id="toast" class="hidden"></div>
+
+<div id="panel" class="hidden">
+  <div id="header"></div>
+  <div id="title"></div>
+  <div id="body"></div>
+  <div id="timeline"><div id="tl-bg"><div id="tl-step"></div><div id="tl-fill"></div><div id="tl-ticks"></div></div><div id="tl-handle"></div></div>
+  <div id="times"><span id="steptime"></span><span id="total"></span></div>
+  <div id="transport">
+    <button id="prev" title="Previous step (←)"><svg viewBox="0 0 16 16"><rect x="2" y="3" width="2" height="10"/><path d="M14 3v10L5 8z"/></svg></button>
+    <button id="rev" title="Play backwards (J)"><svg viewBox="0 0 16 16"><path d="M13 3v10L4 8z"/></svg></button>
+    <button id="play" class="primary" title="Play / pause (Space)"><svg viewBox="0 0 16 16"><path id="playIcon" d="M4 3v10l9-5z"/></svg></button>
+    <button id="next" title="Next step (→)"><svg viewBox="0 0 16 16"><path d="M2 3v10l9-5z"/><rect x="12" y="3" width="2" height="10"/></svg></button>
+    <span class="spacer"></span>
+    <button id="speed" title="Speed (− +)">1×</button>
+    <button id="pageBtn" title="Manual page (M)">Hide page</button>
+  </div>
+  <button id="useBtn" class="hidden">Assembled - now use it &nbsp;(U) &nbsp;→</button>
+</div>
+
+<div id="twinPanel" class="hidden">
+  <div id="twinHeader"></div>
+  <div id="twinStatus"></div>
+  <div id="taskBox" class="hidden">
+    <div id="taskHeader"></div><div id="taskTitle"></div><div id="taskText"></div><div id="taskResult"></div>
+    <div id="taskProgress"><div id="taskFill"></div></div>
+    <div id="taskButtons"><button id="taskPrev">Previous task</button><button id="taskSkip">Skip</button><button id="taskRestart">Restart</button></div>
+  </div>
+</div>
+<div id="tip" class="hidden"></div>
+
+<div id="page" class="hidden"><img id="pageImg" alt="Manual page"><div id="pageNav" class="hidden"><button id="pagePrev" aria-label="Previous page">‹</button><span id="pageLabel"></span><button id="pageNext" aria-label="Next page">›</button></div></div>
+<div id="callout" class="callout hidden"></div>
+<div id="selCallout" class="callout hidden"></div>
+<div id="help" class="hidden"><b>Space</b> play/pause &nbsp; <b>J K L</b> reverse/pause/play &nbsp; <b>← →</b> step &nbsp; <b>, .</b> frame &nbsp; <b>− +</b> speed &nbsp; <b>R</b> replay &nbsp; <b>Home</b> parts &nbsp; <b>M</b> page &nbsp; <b>Click</b> identify part &nbsp; <b>F</b> focus &nbsp; <b>C</b> auto camera &nbsp; <b>X</b> x-ray &nbsp; <b>Drag</b> orbit &nbsp; <b>Wheel</b> zoom &nbsp; <b>Middle / Shift-drag</b> pan &nbsp; <b>Esc</b> menu &nbsp; <b>F8</b> report</div>
+
+<script type="module" src="player.js"></script>
+</body>
+</html>
