@@ -2,7 +2,7 @@
 // (keep in sync; parity_script.json + _unity_trace.json check it). 4 zones with touch sliders 0-9 + Boost, On/Off,
 // Bridge (zones 1+2), timer per zone (- / +), Pause, OK / key lock. Pot detection ("U", zone off after 30 s without a
 // pot), residual heat ("H"). One pot with 1.5 l water; heating runs at simSpeed x.
-import { TwinDevice, registerDevice, registerControl, clamp, clamp01, uVec, colorOnly, roundToInt } from '../twin-core.js?v=edef65954c';
+import { TwinDevice, registerDevice, registerControl, clamp, clamp01, uVec, colorOnly, roundToInt } from '../twin-core.js?v=6e9bd70d3f';
 
 const f32 = Math.fround;
 const WATTS = [0, 100, 200, 350, 550, 800, 1100, 1450, 1850, 2300], BOOST_WATTS = 3000;

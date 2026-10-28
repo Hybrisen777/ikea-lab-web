@@ -2,7 +2,7 @@
 // (keep in sync; parity_script.json + _unity_trace.json check it). Keys on the top edge of the door: programmes,
 // options, delayed start, Start (then close the door within startWindow s); Time Beam on the floor; pull-out baskets
 // that can be loaded; detergent dispenser, rinse aid, special salt. A programme runs at simSpeed x real time.
-import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, roundToInt, uAxisAngle, colorOnly, CsHashSet } from '../twin-core.js?v=edef65954c';
+import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, roundToInt, uAxisAngle, colorOnly, CsHashSet } from '../twin-core.js?v=6e9bd70d3f';
 import * as THREE from 'three';
 
 const f32 = Math.fround;
