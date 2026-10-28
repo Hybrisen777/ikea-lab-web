@@ -3,7 +3,7 @@
 // D = light max, hold D = medium. A pot produces steam, removed in proportion to the airflow (325/410/500/690 m³/h).
 // Grease filter: take out, clean, refit. The steam ParticleSystem is drawn by SteamEmitter (visual only).
 import * as THREE from 'three';
-import { TwinDevice, registerDevice, clamp01, moveTowards, roundToInt, ledHdr, uAxisAngle } from '../twin-core.js?v=3a30df19c5';
+import { TwinDevice, registerDevice, clamp01, moveTowards, roundToInt, ledHdr, uAxisAngle } from '../twin-core.js?v=86501f37ca';
 
 const f32 = Math.fround;
 const clock = (a, b) => String(a).padStart(2, '0') + ':' + String(b).padStart(2, '0');

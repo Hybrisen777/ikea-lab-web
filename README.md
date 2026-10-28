@@ -52,4 +52,4 @@ This repository holds the built site only (generated - changes here are overwrit
 
 Research demo by Jeremi Ranosz, UEP / KTI. Not commercial, not affiliated with or endorsed by IKEA.
 Product names, manual pages and product photos belong to Inter IKEA Systems B.V. and are used here for research and
-demonstration. The site asks search engines not to index it.
+demonstration, to help people assemble and use IKEA products.
