@@ -255,9 +255,10 @@ canvas{display:block;touch-action:none;outline:none}
   <div class="label">SEVERITY</div><div id="repSevs" class="row"></div>
   <div class="label">TITLE</div><input id="repTitle" maxlength="120" placeholder="Short summary, e.g. &quot;Seat goes through the table in step 7&quot;">
   <div class="label">WHAT HAPPENED?</div><textarea id="repDesc" maxlength="4000" placeholder="What did you do, what did you expect, and what happened instead?"></textarea>
-  <div class="label">YOUR NAME (OPTIONAL)</div><input id="repName" maxlength="80" placeholder="So we can ask follow-up questions">
+  <div id="repNameRow"><div class="label">YOUR NAME (OPTIONAL)</div><input id="repName" maxlength="80" placeholder="So we can ask follow-up questions"></div>
   <div class="hint">The report is saved as a .json file in your downloads folder - send it to the team.</div>
   <div id="repError"></div>
+  <div id="repNote" class="hint"></div>
   <div class="buttons"><button id="repCancel" class="btn">Cancel &nbsp;(Esc)</button><button id="repSubmit" class="btn primary">Submit report</button></div>
 </div></div>
 <div id="toast" class="hidden"></div>

@@ -21,12 +21,14 @@ function closeModal(el) { const i = openModals.indexOf(el); if (i < 0) return; o
 
 let scenario = null;      // set by attachScenario() while a product is open
 let products = [];
+let issuesUrl = '';        // index.json "issuesUrl" (public site): Submit opens a pre-filled GitHub issue
 let view = 'menu';        // menu | products | loading | scenario
 
 export async function loadIndex() {
   try {
     const j = await (await fetch('index.json')).json();
     products = Array.isArray(j) ? j : (j.products || []);
+    issuesUrl = (!Array.isArray(j) && j.issuesUrl) || '';
   } catch (e) { products = []; }
   return products;
 }
@@ -116,6 +118,10 @@ function openReport() {
   $('reportWhere').textContent = where();
   $('shotImg').src = report.shot || ''; $('shotFrame').classList.toggle('hidden', !report.shot);
   $('repError').textContent = '';
+  // public site: the report becomes a public GitHub issue (needs a GitHub account)
+  $('repSubmit').innerHTML = issuesUrl ? 'Continue on GitHub &nbsp;→' : 'Submit report';
+  $('repNote').textContent = issuesUrl ? 'Opens a public issue on GitHub (account needed) - do not include personal data. You check it and press Submit there.' : '';
+  $('repNameRow').classList.toggle('hidden', !!issuesUrl);   // GitHub shows who reported it
   refreshReport();
   if (scenario) scenario.pause();
   openModal($('report'));
@@ -151,12 +157,40 @@ function submitReport() {
     gpu: gpuName(), resolution: `${innerWidth}x${innerHeight}@${devicePixelRatio}`,
     screenshotFile: report.attach && report.shot ? 'embedded' : '', screenshotJpeg: report.attach && report.shot ? report.shot : '',
   };
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(r, null, 2)], { type: 'application/json' }));
-  a.download = `issue_${id}.json`; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  if (issuesUrl) { openGitHubIssue(r); return; }
+  download(new Blob([JSON.stringify(r, null, 2)], { type: 'application/json' }), `issue_${id}.json`);
   closeReport(); $('repTitle').value = $('repDesc').value = '';
   toast(`Report saved: issue_${id}.json (your downloads folder)`);
+}
+function download(blob, name) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+/** Public site: a "New issue" page on GitHub, pre-filled with the report as Markdown. A screenshot does not fit in a
+ *  URL, so it is saved as issue_<id>.jpg and the issue text asks to drag it in. */
+function openGitHubIssue(r) {
+  const shot = r.screenshotJpeg;
+  if (shot) download(dataUrlBlob(shot), `issue_${r.reportId}.jpg`);
+  const cell = v => String(v ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');   // Markdown table cell
+  const head = [`**Type:** ${r.category} · **Severity:** ${r.severity}`, `**Where:** ${r.where}`, '', r.description || '_(no description)_', ''];
+  if (shot) head.push(`**Screenshot:** drag \`issue_${r.reportId}.jpg\` from your downloads folder into this box.`, '');
+  const ctx = ['<details><summary>Context (added automatically)</summary>', '', '| | |', '|---|---|',
+    ...[['product', `${r.productName} ${r.productId}`.trim()], ['mode', r.mode], ['seconds in scenario', r.secondsInScenario], ...r.state.map(x => [x.key, x.value]),
+      ['camera', r.camera], ['browser', r.os], ['gpu', r.gpu], ['resolution', r.resolution], ['report id', r.reportId]].map(([k, v]) => `| ${cell(k)} | ${cell(v)} |`),
+    '', '</details>'];
+  let body = head.concat(ctx).join('\n');
+  while (body.length > 6000 && ctx.length > 8) { ctx.splice(ctx.length - 4, 1); body = head.concat(ctx, ['_(context shortened)_']).join('\n'); }   // URL length limit
+  const title = `[${r.category}] ${r.productName ? r.productName + ': ' : ''}${r.title}`;
+  window.open(`${issuesUrl}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`, '_blank', 'noopener');
+  closeReport(); $('repTitle').value = $('repDesc').value = '';
+  toast(shot ? `Opened GitHub - drag issue_${r.reportId}.jpg into the issue` : 'Opened GitHub - check the issue and press Submit there');
+}
+function dataUrlBlob(u) {
+  const [meta, b64] = u.split(','), bin = atob(b64), a = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+  return new Blob([a], { type: meta.split(':')[1].split(';')[0] });
 }
 const closeReport = () => closeModal($('report'));
 
