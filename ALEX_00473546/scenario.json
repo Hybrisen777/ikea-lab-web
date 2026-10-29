@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:21:01.5921550Z","source":"Assets/Products/ALEX_00473546/product.json",
+"exported":"2026-10-28T23:50:18.7168108Z","source":"Assets/Products/ALEX_00473546/product.json",
 "product":{"id":"004.735.46","name":"ALEX","category":"Drawer units","url":"https://www.ikea.com/nl/en/p/alex-drawer-unit-white-00473546/","introText":"ALEX drawer unit, 36x58x70 cm, white, 5 drawers. Assembly instructions AA-2242840-5. Tools: flat and Phillips screwdriver, hammer. Work on a soft surface; do not use a power drill.","partsPage":"ALEX_manual_p03","partsSummary":"1x Allen key,  1x Back,  1x Bottom,  34x Cam bolt,  18x Cam lock a,  16x Cam lock b,  5x Dback,  5x Dbottom,  16x Dowel,  5x Dside l,  5x Dside r,  5x Front,  4x Glide,  20x Nail,  2x Side,  10x Stop screw,  1x Top"},
 "model":"model.glb","rootName":"ALEX_Unit","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":168.48335,
 "steps":[

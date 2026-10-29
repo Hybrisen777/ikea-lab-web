@@ -3,7 +3,7 @@
 // Ports of Assets/IKEAPipeline/Runtime/Twin/*.cs - keep the behaviour identical (checked by the parity trace).
 // Component fields come raw from twin.json (Unity convention): positions / offsets via uVec, rotations via uAxisAngle.
 import * as THREE from 'three';
-import { srgb } from './stage.js?v=6e9bd70d3f';
+import { srgb } from './stage.js?v=76fd8115a3';
 
 export const DEG = Math.PI / 180;
 export const clamp = (v, a, b) => Math.min(b, Math.max(a, v));

@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T00:45:13.8384636Z",
+"exported":"2026-10-29T00:00:10.8614659Z",
 "source":"Assets/Products/TORSBODA_40548088/TORSBODA_Twin.prefab",
 "product":{"id":"405.480.88","name":"TORSBODA dishwasher","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/torsboda-integrated-dishwasher-ikea-700-40548088/","mode":"twin","introText":"Integrated dishwasher, IKEA 700, 60 cm, with cutlery drawer, Silent and IntensiveZone. Keys on the top edge of the door, Time Beam on the floor. Manual AA-2576615 (simplified: basic settings, basket heights and water-hardness setting are not simulated). Programmes run at 90x speed."},
 "model":"model.glb",

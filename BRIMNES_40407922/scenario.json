@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:35:47.3755307Z","source":"Assets/Products/BRIMNES_40407922/product.json",
+"exported":"2026-10-28T23:51:32.5792418Z","source":"Assets/Products/BRIMNES_40407922/product.json",
 "product":{"id":"404.079.22","name":"BRIMNES wardrobe","category":"Wardrobes","url":"https://www.ikea.com/nl/en/p/brimnes-wardrobe-with-3-doors-white-40407922/","introText":"BRIMNES wardrobe with 3 doors (one with mirror), white, 117x190 cm. Assembly instructions AA-2207256-4 (simplified: cam fittings shown as screws). Two people needed. Tools: Phillips screwdriver, hammer, Allen key.","partsPage":"BRIM_manual_p09","partsSummary":"3x Back,  1x Bottom,  1x Divider,  3x Door,  12x Dowel,  3x Handle,  9x Hinge,  18x Hscrew,  18x Nail,  16x Pin,  9x Plate,  1x Plinth,  18x Pscrew,  1x Rail,  2x Rail holder,  8x Screw,  1x Shelf,  1x Shelf r1,  1x Shelf r2,  1x Shelf r3,  2x Side,  1x Top"},
 "model":"model.glb","rootName":"BRIMNES_Wardrobe","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":143.26666,
 "steps":[

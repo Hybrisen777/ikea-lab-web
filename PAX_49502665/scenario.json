@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:36:26.9607852Z","source":"Assets/Products/PAX_49502665/product.json",
+"exported":"2026-10-28T23:57:10.3875679Z","source":"Assets/Products/PAX_49502665/product.json",
 "product":{"id":"495.026.65","name":"PAX / FORSAND","category":"Wardrobes","url":"https://www.ikea.com/nl/en/p/pax-forsand-wardrobe-white-white-s49502665/","introText":"PAX / FORSAND wardrobe 100x60x236 cm, white: foldable PAX frame (AA-2174072-9), 2 FORSAND doors with KOMPLEMENT soft-closing hinges (AA-2416848-2), KOMPLEMENT clothes rail (AA-938836-3) and 3 shelves. Two people and a step ladder; the frame must be fixed to the wall. The screws and sleeves 100402 / 100644 are only for joining frames.","partsPage":"PAX_manual_p06","partsSummary":"1x Allen key,  1x Back,  2x Bclip,  1x Bottom,  2x Conn,  2x Conn f,  2x Cover,  2x Door,  2x Eclip,  2x Fdowel,  4x Foot,  8x Hinge,  16x Hscrew,  2x Join screw,  2x Join sleeve,  2x Pclip,  1x Plinth f,  1x Plinth r,  16x Pscrew,  1x Rail,  2x Rail bracket,  4x Rscrew,  3x Shelf,  2x Side,  2x Spacer,  12x Support,  1x Top,  2x Wwasher"},
 "model":"model.glb","rootName":"PAX_Wardrobe","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":115.05001,
 "steps":[

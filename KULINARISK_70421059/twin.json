@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T00:40:52.2592890Z",
+"exported":"2026-10-28T23:54:34.9703320Z",
 "source":"Assets/Products/KULINARISK_70421059/KULINARISK_Twin.prefab",
 "product":{"id":"704.210.59","name":"KULINARISK oven","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/kulinarisk-forced-air-oven-w-pyrolytic-funct-ikea-700-stainless-steel-70421059/","mode":"twin","introText":"Forced air oven with pyrolytic self-cleaning, IKEA 700 stainless steel. Electronic programmer with display, up/down and OK keys. Manual AA-2063500. Heating, clock and cleaning run at 12x speed."},
 "model":"model.glb",

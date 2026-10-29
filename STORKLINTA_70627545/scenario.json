@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:37:21.3981867Z","source":"Assets/Products/STORKLINTA_70627545/product.json",
+"exported":"2026-10-28T23:59:48.3851124Z","source":"Assets/Products/STORKLINTA_70627545/product.json",
 "product":{"id":"706.275.45","name":"STORKLINTA","category":"Chests of drawers","url":"https://www.ikea.com/nl/en/p/storklinta-chest-of-6-drawers-white-70627545/","introText":"STORKLINTA chest of 6 drawers, white, 70x50x120 cm. Assembly instructions AA-2620328-4 (simplified: the drawer interlock is left out). Tools: Phillips screwdriver, hammer.","partsPage":"STORK_manual_p07","partsSummary":"3x Back,  1x Bottom,  6x Dback,  6x Dbottom,  1x Divider,  8x Dowel,  24x Dscrew,  6x Dside l,  6x Dside r,  6x Front,  4x Glide,  1x Plinth,  36x Rscrew,  1x Runner div l,  1x Runner div r,  5x Runner l,  5x Runner r,  2x Side,  1x Top"},
 "model":"model.glb","rootName":"STORKLINTA_Chest","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":132.15001,
 "steps":[

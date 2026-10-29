@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:37:43.1423377Z","source":"Assets/Products/TROTTENCRANK_79429602/product.json",
+"exported":"2026-10-29T00:00:53.2098954Z","source":"Assets/Products/TROTTENCRANK_79429602/product.json",
 "product":{"id":"794.296.02","name":"TROTTEN desk (crank)","category":"Desks","url":"https://www.ikea.com/nl/en/p/trotten-desk-sit-stand-white-s79429602/","introText":"TROTTEN desk sit/stand with crank, white, 160x80 cm (72-122 cm). Underframe instructions AA-2260717-3, table top AA-2179340-4. Two people needed to turn it over.","partsPage":"TROT_manual_p03","partsSummary":"2x Beam,  4x Bscrew,  1x Crank,  1x Crank holder,  1x Drive shaft,  4x Fbolt,  2x Foot,  4x Glide,  2x Hscrew,  2x Leg,  4x Lscrew,  1x Top,  8x Tscrew"},
 "model":"model.glb","rootName":"TROTTEN_Desk","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":47.63334,
 "steps":[

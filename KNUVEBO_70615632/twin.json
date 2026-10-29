@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T00:40:18.3292446Z",
+"exported":"2026-10-28T23:54:00.7240623Z",
 "source":"Assets/Products/KNUVEBO_70615632/KNUVEBO_Twin.prefab",
 "product":{"id":"706.156.32","name":"KNUVEBO extractor hood","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/knuvebo-wall-mounted-extractor-hood-ikea-500-black-70615632/","mode":"twin","introText":"Wall-mounted extractor hood, IKEA 500, 70 cm: four touch keys on the glass (A/B/C fan speeds, long C = 6-minute booster, D = light, long D = medium light), LED light, washable grease filter. Manual AA-2636603. Steam and the booster timer run at 10x speed."},
 "model":"model.glb",

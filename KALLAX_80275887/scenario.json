@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-27T22:29:29.9574806Z","source":"Assets/Products/KALLAX_80275887/product.json",
+"exported":"2026-10-28T23:53:05.0261062Z","source":"Assets/Products/KALLAX_80275887/product.json",
 "product":{"id":"802.758.87","name":"KALLAX","category":"Shelving units","url":"https://www.ikea.com/nl/en/p/kallax-shelving-unit-white-80275887/","introText":"KALLAX shelving unit, white, 77x147 cm (2x4 compartments). Assembly instructions AA-2703433-1. Tools: hammer and the Allen key. Two people recommended for standing it up.","partsPage":"KALLAX_manual_p10","partsSummary":"1x Allen key,  1x Bottom,  4x Divider,  22x Dowel,  8x Screw,  1x Shelf 1a,  1x Shelf 1b,  1x Shelf 2a,  1x Shelf 2b,  1x Shelf 3a,  1x Shelf 3b,  2x Side,  1x Top"},
 "model":"model.glb","rootName":"KALLAX_Unit","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":60.21667,
 "steps":[

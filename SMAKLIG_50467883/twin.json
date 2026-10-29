@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T00:42:43.5010376Z",
+"exported":"2026-10-28T23:57:51.2889716Z",
 "source":"Assets/Products/SMAKLIG_50467883/SMAKLIG_Twin.prefab",
 "product":{"id":"504.678.83","name":"SMAKLIG hob","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/smaklig-induction-hob-ikea-500-black-50467883/","mode":"twin","introText":"Induction hob, IKEA 500, 59 cm, 4 zones with touch sliders, Boost, Bridge+, timers, pause and key lock. Manual AA-2215007. Water heating runs at 10x speed."},
 "model":"model.glb",

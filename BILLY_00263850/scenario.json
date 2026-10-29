@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T21:31:27.6330255Z","source":"Assets/Products/BILLY_00263850/product.json",
+"exported":"2026-10-28T23:50:43.3855217Z","source":"Assets/Products/BILLY_00263850/product.json",
 "product":{"id":"002.638.50","name":"BILLY","category":"Bookcases & shelving units","url":"https://www.ikea.com/nl/en/p/billy-bookcase-white-00263850/","introText":"BILLY bookcase 80x28x202 cm, white. Assembly instructions AA-1823127-9. Two people recommended; work on a soft surface. Tools: Phillips and flat screwdrivers, hammer, pencil, ruler. The bookcase must be fixed to the wall (wall screws not included).","partsPage":"BILLY_manual_p06","partsSummary":"1x Back,  1x Bottom,  2x Bracket,  12x Cam,  12x Cam bolt,  16x Dowel,  1x Fixed shelf,  18x Nail,  1x Plinth,  2x Screw,  4x Shelf,  2x Side,  16x Support,  1x Top,  2x Washer"},
 "model":"model.glb","rootName":"BILLY_Bookcase","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":88.08334,
 "steps":[

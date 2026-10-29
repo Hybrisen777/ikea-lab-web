@@ -4,14 +4,14 @@
 // QA: window.twin.runTrace(script) replays a parity script frame by frame exactly like Unity's TwinTraceRunner.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js?v=6e9bd70d3f';
-import { hideLoading, attachScenario, modal } from './menu.js?v=6e9bd70d3f';
-import { asset } from './settings.js?v=6e9bd70d3f';
-import { controlTypes, deviceTypes, richText, clamp, DEG, fmt0, TextLabel } from './twin-core.js?v=6e9bd70d3f';
+import { createStage, srgb } from './stage.js?v=76fd8115a3';
+import { hideLoading, attachScenario, modal } from './menu.js?v=76fd8115a3';
+import { asset, settings } from './settings.js?v=76fd8115a3';
+import { controlTypes, deviceTypes, richText, clamp, DEG, fmt0, TextLabel } from './twin-core.js?v=76fd8115a3';
 
 /** Unity controller class -> module with its port. */
-const DEVICE_MODULES = { StarkvindController: './devices/starkvind.js?v=6e9bd70d3f', HobController: './devices/hob.js?v=6e9bd70d3f', DishwasherController: './devices/dishwasher.js?v=6e9bd70d3f', FinsmakareController: './devices/finsmakare.js?v=6e9bd70d3f', OvenController: './devices/oven.js?v=6e9bd70d3f', HoodController: './devices/hood.js?v=6e9bd70d3f',
-  MicrowaveController: './devices/microwave.js?v=6e9bd70d3f', DeskController: './devices/desk.js?v=6e9bd70d3f' };
+const DEVICE_MODULES = { StarkvindController: './devices/starkvind.js?v=76fd8115a3', HobController: './devices/hob.js?v=76fd8115a3', DishwasherController: './devices/dishwasher.js?v=76fd8115a3', FinsmakareController: './devices/finsmakare.js?v=76fd8115a3', OvenController: './devices/oven.js?v=76fd8115a3', HoodController: './devices/hood.js?v=76fd8115a3',
+  MicrowaveController: './devices/microwave.js?v=76fd8115a3', DeskController: './devices/desk.js?v=76fd8115a3' };
 
 const $ = id => document.getElementById(id);
 const TRACE_DT = 1 / 60;
@@ -105,9 +105,12 @@ export async function runTwin(dir, entry) {
     orbit.distance = o.length(); orbit.pitch = Math.asin(o.y / orbit.distance) / DEG; orbit.yaw = Math.atan2(o.x, o.z) / DEG;
   }
   resetCamera();
+  // narrow (portrait) screens: step back so the device keeps the width it has on a desktop screen (up to 2.8x)
+  const PORTRAIT_REF = 1.25;
+  const fitScale = () => clamp(PORTRAIT_REF / Math.max(camera.aspect, 0.1), 1, 2.3);
   function placeCamera() {
     const p = orbit.pitch * DEG, y = orbit.yaw * DEG;
-    camera.position.set(Math.cos(p) * Math.sin(y), Math.sin(p), Math.cos(p) * Math.cos(y)).multiplyScalar(orbit.distance).add(orbit.target);
+    camera.position.set(Math.cos(p) * Math.sin(y), Math.sin(p), Math.cos(p) * Math.cos(y)).multiplyScalar(orbit.distance * fitScale()).add(orbit.target);
     camera.lookAt(orbit.target);
   }
   const zoomBy = notches => {
@@ -116,7 +119,8 @@ export async function runTwin(dir, entry) {
   };
   function pan(dx, dy) {
     const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0), up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
-    orbit.target.addScaledVector(right, -dx * PAN_SPEED * orbit.distance).addScaledVector(up, dy * PAN_SPEED * orbit.distance);
+    const d = orbit.distance * fitScale();
+    orbit.target.addScaledVector(right, -dx * PAN_SPEED * d).addScaledVector(up, dy * PAN_SPEED * d);
   }
 
   // ---------------- interactor (TwinInteractor) ----------------
@@ -218,16 +222,37 @@ export async function runTwin(dir, entry) {
   const pages = (tw.manualPages || []).map(p => ({ name: p.name, src: asset(dir + '/' + p.file) }));
   const ui = new TaskUI(tw, device, ctx, pages);
   $('twinHeader').textContent = `${(tw.product.name || 'DEVICE').toUpperCase()}  ·  DIGITAL TWIN`;
-  $('help').innerHTML = richText(tw.help || '') + ' &nbsp; <b>M</b> manual &nbsp; <b>PgUp/PgDn</b> pages &nbsp; <b>Esc</b> menu &nbsp; <b>F8</b> report';
+  $('help').innerHTML = richText(tw.help || '') + ' &nbsp; <b>M</b> manual &nbsp; <b>T</b> text &nbsp; <b>PgUp/PgDn</b> pages &nbsp; <b>Esc</b> menu &nbsp; <b>F8</b> report';
   addEventListener('keydown', e => {
     if (e.ctrlKey || e.metaKey || e.altKey || modal.isOpen || /INPUT|TEXTAREA/.test(document.activeElement?.tagName || '')) return;
     if (e.key === 'm' || e.key === 'M') { ui.toggleManual(); e.preventDefault(); }
     else if (e.key === 'PageDown') { ui.flip(1); e.preventDefault(); }
     else if (e.key === 'PageUp') { ui.flip(-1); e.preventDefault(); }
+    else if (e.key === 't' || e.key === 'T') { toggleText(); e.preventDefault(); }
   });
+  // status + task text on / off (shared with the step panel's setting)
+  const textBtn = $('twinTextBtn');
+  function refreshCompact() {
+    const c = settings.compactPanel; $('twinPanel').classList.toggle('compact', c);
+    textBtn.textContent = c ? '▼' : '▲'; textBtn.title = c ? 'Show status and task text (T)' : 'Hide status and task text (T)'; textBtn.setAttribute('aria-label', textBtn.title);
+  }
+  const toggleText = () => settings.set('compactPanel', !settings.compactPanel);
+  textBtn.addEventListener('click', () => { toggleText(); textBtn.blur(); });
+  settings.on(k => { if (k === 'compactPanel') refreshCompact(); }); refreshCompact();
 
   // ---------------- frame ----------------
-  function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+  // portrait: shift the picture so the device sits in the middle of the free area under the panel (ray picking uses
+  // the same projection, so clicks still hit)
+  let viewShift = 0;
+  function centreBelowPanel() {
+    const r = $('twinPanel').getBoundingClientRect();
+    const s = camera.aspect < 1 && r.height > 0 ? Math.round(r.bottom / 2) : 0;
+    if (s === viewShift) return;
+    viewShift = s;
+    if (s) camera.setViewOffset(innerWidth, innerHeight, 0, -s, innerWidth, innerHeight); else camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+  }
+  function resize() { viewShift = -1; renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
   addEventListener('resize', resize); resize();
   const clock = new THREE.Clock();
   let trace = null;
@@ -248,7 +273,7 @@ export async function runTwin(dir, entry) {
       orbit.distance = THREE.MathUtils.lerp(orbit.distance, orbit.zoomTarget, 1 - Math.exp(-ZOOM_SHARPNESS * Math.min(dt, 0.05)));
       if (Math.abs(orbit.distance - orbit.zoomTarget) < 5e-4) { orbit.distance = orbit.zoomTarget; orbit.zoomTarget = -1; }
     }
-    placeCamera();
+    placeCamera(); centreBelowPanel();
     const tip = $('tip'), show = hovered && lastPointer?.type === 'mouse' && !modal.isOpen;
     tip.classList.toggle('hidden', !show);
     if (show) { tip.textContent = hovered.label; tip.style.transform = `translate(${lastPointer.x + 18}px, ${lastPointer.y + 12}px)`; }

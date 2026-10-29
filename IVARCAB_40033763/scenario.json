@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-27T22:29:12.6727739Z","source":"Assets/Products/IVARCAB_40033763/product.json",
+"exported":"2026-10-28T23:52:47.0648267Z","source":"Assets/Products/IVARCAB_40033763/product.json",
 "product":{"id":"400.337.63","name":"IVAR cabinet","category":"Cabinets","url":"https://www.ikea.com/nl/en/p/ivar-cabinet-pine-40033763/","introText":"IVAR cabinet, solid pine, 80x30x83 cm, 2 doors, 2 shelves. Assembly instructions AA-2272100-5. Tools: Phillips screwdriver and the Allen key. Free-standing version (no IVAR side units).","partsPage":"IVAR_manual_p05","partsSummary":"1x Allen key,  1x Back,  1x Bottom,  8x Confirmat,  2x Door,  8x Dowel,  4x Hinge,  8x Hinge screw,  4x Mount plate,  8x Plate screw,  2x Shelf,  8x Shelf pin,  2x Side,  1x Top"},
 "model":"model.glb","rootName":"IVAR_Cabinet","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":71.7,
 "steps":[

@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T00:37:59.6606723Z",
+"exported":"2026-10-28T23:51:55.2314646Z",
 "source":"Assets/Products/FINSMAKARE_50411730/FINSMAKARE_Twin.prefab",
 "product":{"id":"504.117.30","name":"FINSMAKARE oven","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/finsmakare-forced-air-oven-w-pyro-steam-func-ikea-700-black-50411730/","mode":"twin","introText":"Forced air oven with steam and pyrolytic cleaning, IKEA 700. Electronic programmer with display, shuttle (rotate with the wheel, click = OK) and touch keys. Manual AA-2048786. Heating and clock functions run at 12x speed."},
 "model":"model.glb",

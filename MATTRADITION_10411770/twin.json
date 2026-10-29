@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T00:42:16.2279163Z",
+"exported":"2026-10-28T23:56:42.6452447Z",
 "source":"Assets/Products/MATTRADITION_10411770/MATTRADITION_Twin.prefab",
 "product":{"id":"104.117.70","name":"MATTRADITION","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/mattradition-microwave-oven-ikea-300-black-10411770/","mode":"twin","introText":"Microwave oven, 750 W. Click the buttons and the door to operate it."},
 "model":"model.glb",

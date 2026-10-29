@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T23:36:46.9385191Z",
+"exported":"2026-10-28T23:58:22.2758143Z",
 "source":"Assets/Products/STARKVINDTABLE_80501951/STARKVIND_Table_Twin.prefab",
 "product":{"id":"805.019.51","name":"STARKVIND table with air purifier","category":"Air purifiers","url":"https://www.ikea.com/nl/en/p/starkvind-table-with-air-purifier-stained-oak-veneer-dark-brown-smart-80501951/","mode":"both","introText":"STARKVIND table with air purifier, 54 cm, oak veneer. Assembly AA-2286111, use AA-2284600 (knob: press = Auto / Off, turn = speed 1-5, hold = lock). When assembled, press \"Use it\" to switch the purifier on. Room air runs at 30x speed."},
 "model":"twin.glb",
