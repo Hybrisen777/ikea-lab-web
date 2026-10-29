@@ -4,7 +4,7 @@
 // source (candle) + decay through the filter (CADR per speed). Filter change: unplug, cover off, filter out / new,
 // cover on, plug in, hold RESET 3 s.
 import * as THREE from 'three';
-import { TwinDevice, registerDevice, registerControl, clamp, lerp, moveTowards, roundToInt, uVec, uAxisAngle, led, fmt0 } from '../twin-core.js?v=76fd8115a3';
+import { TwinDevice, registerDevice, registerControl, clamp, lerp, moveTowards, roundToInt, uVec, uAxisAngle, led, fmt0 } from '../twin-core.js?v=38096f57ab';
 
 const Mode = { Off: 'Off', Auto: 'Auto', Manual: 'Manual' };
 export const quality = pm => pm <= 35 ? 'good' : pm <= 85 ? 'ok' : 'notgood';

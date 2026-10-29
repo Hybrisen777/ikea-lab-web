@@ -3,9 +3,9 @@
 // callouts, click-to-identify, x-ray), OrbitCamera + ZoomInput. Menus and settings: menu.js / settings.js. Format: README.md.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js?v=76fd8115a3';
-import { settings, speedLabel, SPEEDS, asset, BASE_RATE } from './settings.js?v=76fd8115a3';
-import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=76fd8115a3';
+import { createStage, srgb } from './stage.js?v=38096f57ab';
+import { settings, speedLabel, SPEEDS, asset, BASE_RATE } from './settings.js?v=38096f57ab';
+import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=38096f57ab';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -17,6 +17,7 @@ const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '
 const FRAME_STEP = 1 / 30;
 const HIGHLIGHT = [1, 0.72, 0], GLOW = 2.2;
 const XRAY_MAX_RADIUS = 0.08, BIG_XRAY_ALPHA = 0.3;
+const ANGLE_SMOOTH_TIME = 0.9;   // turning to a planned camera angle (AssemblyFocus.angleSmoothTime)
 const FRAMING = 1.25, SMOOTH_TIME = 0.55, FRAME_MIN = 0.45, FRAME_MAX = 3.6, SELECT_MIN = 0.22;
 const ORBIT_SPEED = 0.25, PAN_SPEED = 0.0015, CAM_MIN = 0.35, CAM_MAX = 6;
 const ZOOM_STEP = 0.15, ZOOM_SHARPNESS = 14;
@@ -30,7 +31,7 @@ else {
   const entry = index.find(p => p.folder === folder);
   showLoading(entry?.name || folder);
   const useTwin = entry?.mode === 'twin' || (entry?.mode === 'both' && params.get('use') === '1');   // "both": the use phase
-  if (useTwin) await import('./twin.js?v=76fd8115a3').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
+  if (useTwin) await import('./twin.js?v=38096f57ab').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
   else await run(folder, entry).catch(fail);
 }
 
@@ -184,7 +185,20 @@ async function run(dir, entry) {
   const orbit = { target: new THREE.Vector3(...sc.camera.target), distance: 1, yaw: 0, pitch: 0, zoomBias: 1, zoomTarget: -1 };
   { const o = new THREE.Vector3(...sc.camera.position).sub(orbit.target);
     orbit.distance = o.length(); orbit.pitch = Math.asin(o.y / orbit.distance) / DEG; orbit.yaw = Math.atan2(o.x, o.z) / DEG; }
-  const vel = { target: new THREE.Vector3(), dist: 0 };
+  const vel = { target: new THREE.Vector3(), dist: 0, yaw: 0, pitch: 0 };
+  const home = { yaw: orbit.yaw, pitch: orbit.pitch };
+  // planned camera angle (Unity StepCameraPlanner) of the shown step / move; ?cam=fixed = old behaviour (A/B)
+  const offsetAngles = o => ({ yaw: Math.atan2(o[0], o[2]) / DEG, pitch: Math.asin(clamp(o[1], -1, 1)) / DEG });
+  const planned = params.get('cam') !== 'fixed' && steps.some(s => s.shots);
+  function plannedView() {
+    if (!planned) return null;
+    if (st.chapter === 0) return home;
+    const shots = steps[st.chapter - 1].shots;
+    if (!shots || !shots.length) return null;
+    let v = shots[0];
+    for (const s of shots) if (s[0] <= st.local + 1e-4) v = s;
+    return offsetAngles(v.slice(1));
+  }
   function placeCamera() {
     const p = orbit.pitch * DEG, y = orbit.yaw * DEG;
     camera.position.set(Math.cos(p) * Math.sin(y), Math.sin(p), Math.cos(p) * Math.cos(y)).multiplyScalar(orbit.distance).add(orbit.target);
@@ -193,7 +207,7 @@ async function run(dir, entry) {
   function handBackToStep() {   // step change / play: drop the clicked part and give the camera back to the step
     if (st.selected) select(null);
     st.selFraming = false; st.userControlled = false;
-    vel.target.set(0, 0, 0); vel.dist = 0;
+    vel.target.set(0, 0, 0); vel.dist = 0; vel.yaw = vel.pitch = 0;
   }
   // Unity Mathf.SmoothDamp
   function smoothDamp(cur, target, v, smoothTime, dt) {
@@ -203,6 +217,11 @@ async function run(dir, entry) {
     let nv = (v - omega * temp) * exp, out = target + (change + temp) * exp;
     if ((target - cur > 0) === (out > target)) { out = target; nv = dt > 0 ? (out - target) / dt : 0; }
     return [out, nv];
+  }
+  // Unity Mathf.SmoothDampAngle
+  function smoothDampAngle(cur, target, v, smoothTime, dt) {
+    const delta = ((target - cur) % 360 + 540) % 360 - 180;
+    return smoothDamp(cur, cur + delta, v, smoothTime, dt);
   }
   function dampVec(cur, target, v, dt) {
     for (const k of ['x', 'y', 'z']) { const [o, nv] = smoothDamp(cur[k], target[k], v[k], SMOOTH_TIME, dt); cur[k] = o; v[k] = nv; }
@@ -231,6 +250,11 @@ async function run(dir, entry) {
       orbit.zoomTarget = -1;   // the framing owns the distance; wheel = bias
       dampVec(orbit.target, b.getCenter(tmpC), vel.target, dt);
       [orbit.distance, vel.dist] = smoothDamp(orbit.distance, dist * orbit.zoomBias, vel.dist, SMOOTH_TIME, dt);
+      const pv = settings.autoCamera && !(st.selFraming && st.selected) ? plannedView() : null;
+      if (pv) {
+        [orbit.yaw, vel.yaw] = smoothDampAngle(orbit.yaw, pv.yaw, vel.yaw, ANGLE_SMOOTH_TIME, dt);
+        [orbit.pitch, vel.pitch] = smoothDampAngle(orbit.pitch, pv.pitch, vel.pitch, ANGLE_SMOOTH_TIME, dt);
+      }
     } else if (orbit.zoomTarget > 0) {
       orbit.distance = THREE.MathUtils.lerp(orbit.distance, orbit.zoomTarget, 1 - Math.exp(-ZOOM_SHARPNESS * Math.min(dt, 0.05)));
       if (Math.abs(orbit.distance - orbit.zoomTarget) < 5e-4) { orbit.distance = orbit.zoomTarget; orbit.zoomTarget = -1; }
