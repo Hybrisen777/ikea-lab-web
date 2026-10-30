@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>IKEA Product Lab Player</title>
 <!-- ?bench=1: load time / fps overlay (same script as in the Unity WebGL comparison build) -->
-<script>if (/[?&]bench=1/.test(location.search)) document.write('<script src="bench.js?v=52995530e4"><\/script>');</script>
+<script>if (/[?&]bench=1/.test(location.search)) document.write('<script src="bench.js?v=1964ee872d"><\/script>');</script>
 <!-- three.js pinned to an exact version; no build step -->
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 <style>
@@ -316,7 +316,7 @@ canvas{display:block;touch-action:none;outline:none}
 // build_site.py: load this build's modules only if this page is the current build. GitHub Pages lets browsers cache
 // every file for 10 min, so after an update a cached player.html could otherwise run next to newer modules.
 (function () {
-  var V = '52995530e4', q = new URLSearchParams(location.search);
+  var V = '1964ee872d', q = new URLSearchParams(location.search);
   function go() { window.SITE_VERSION = V; var s = document.createElement('script'); s.type = 'module'; s.src = 'player.js?v=' + V; document.body.appendChild(s); }
   fetch('version.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
     if (j.v !== V && q.get('_v') !== j.v) { q.set('_v', j.v); location.replace(location.pathname + '?' + q); }   // a fresh URL = a fresh page

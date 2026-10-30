@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:52:28.5163007Z","source":"Assets/Products/IVAR6_09631216/product.json",
+"exported":"2026-10-30T02:46:06.7965577Z","source":"Assets/Products/IVAR6_09631216/product.json",
 "product":{"id":"096.312.16","name":"IVAR shelving","category":"Shelving units","url":"https://www.ikea.com/nl/en/p/ivar-shelving-unit-with-6-shelves-pine-s09631216/","introText":"IVAR shelving unit with 6 shelves, solid pine, 89x50x226 cm: 2 side units, 6 shelves, X-brace. Side unit instructions AA-2204612-8. Tools: hammer, Phillips screwdriver.","partsPage":"IVAR6_manual_p01a","partsSummary":"4x Bscrew,  1x Cross brace,  20x Dowel,  24x Pin,  2x Post b,  2x Post f,  1x Rung l1,  1x Rung l2,  1x Rung l3,  1x Rung l4,  1x Rung l5,  1x Rung r1,  1x Rung r2,  1x Rung r3,  1x Rung r4,  1x Rung r5,  6x Shelf"},
 "model":"model.glb","rootName":"IVAR_Shelving","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":98.76668,
 "steps":[

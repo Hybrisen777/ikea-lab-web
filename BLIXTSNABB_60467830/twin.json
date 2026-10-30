@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T23:51:02.6465372Z",
+"exported":"2026-10-30T02:43:40.8013136Z",
 "source":"Assets/Products/BLIXTSNABB_60467830/BLIXTSNABB_Twin.prefab",
 "product":{"id":"604.678.30","name":"BLIXTSNABB hob","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/blixtsnabb-induction-hob-ikea-700-black-60467830/","mode":"twin","introText":"Induction hob, IKEA 700, 78 cm: flexible zone, centre zone and two right zones that can be bridged. Touch sliders 0-9 with Booster, timer per zone, Pause, Lock. Manual AA-2198542 (simplified: the multi-flex modes and the second centre slider are not simulated). Water heating runs at 10x speed."},
 "model":"model.glb",

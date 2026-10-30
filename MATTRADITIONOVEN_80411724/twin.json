@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T23:56:11.8681999Z",
+"exported":"2026-10-30T02:52:50.6661262Z",
 "source":"Assets/Products/MATTRADITIONOVEN_80411724/MATTRADITIONOVEN_Twin.prefab",
 "product":{"id":"804.117.24","name":"MATTRADITION oven","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/mattradition-forced-air-oven-ikea-300-black-80411724/","mode":"twin","introText":"Built-in forced air oven, IKEA 300, 59.5x59.5 cm. Knobs: A function, B minute minder, C thermostat; LED D shows heating. Manual AA-1951511. Heating runs at 12x speed."},
 "model":"model.glb",

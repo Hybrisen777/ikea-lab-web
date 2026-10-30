@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-29T00:01:11.0050403Z","source":"Assets/Products/TROTTENELEC_49621871/product.json",
+"exported":"2026-10-30T03:02:04.5358742Z","source":"Assets/Products/TROTTENELEC_49621871/product.json",
 "product":{"id":"496.218.71","name":"TROTTEN desk sit/stand (electric)","category":"Desks","url":"https://www.ikea.com/nl/en/p/trotten-desk-sit-stand-electric-white-s49621871/","introText":"TROTTEN desk sit/stand, electric, white, 120x70 cm (71-118 cm, max 50 kg). Assembly AA-2746846 (simplified: legs pre-assembled, beam in one piece), hand controller AA-2637190. When assembled, press \"Use it\" to drive the desk.","partsPage":"TEL_manual_p03","partsSummary":"1x Beam,  4x Bscrew,  1x Control box,  2x Foot,  8x Fscrew,  1x Handset,  2x Leg,  1x Top,  8x Tscrew"},
 "model":"model.glb","rootName":"TROTTEN_ElDesk","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":37.73334,
 "steps":[

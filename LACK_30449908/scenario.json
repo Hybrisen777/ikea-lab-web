@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:55:06.0324664Z","source":"Assets/Products/LACK_30449908/product.json",
+"exported":"2026-10-30T02:50:51.7608419Z","source":"Assets/Products/LACK_30449908/product.json",
 "product":{"id":"304.499.08","name":"LACK","category":"Tables","url":"https://www.ikea.com/nl/en/p/lack-side-table-white-30449908/","introText":"LACK side table 55x55x45 cm, white. Assembly instructions AA-2606170. Work on a soft surface (e.g. a rug) so the table top is not scratched. No tools needed. Max load 10 kg - do not sit on the table.","partsPage":"LACK_manual_p01","partsSummary":"4x Leg,  4x Screw,  1x Top"},
 "model":"model.glb","rootName":"LACK_SideTable","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":13.58333,
 "steps":[

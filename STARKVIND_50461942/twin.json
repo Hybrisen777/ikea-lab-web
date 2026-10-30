@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T23:58:56.9360534Z",
+"exported":"2026-10-30T02:57:48.1520302Z",
 "source":"Assets/Products/STARKVIND_50461942/STARKVIND_Twin.prefab",
 "product":{"id":"504.619.42","name":"STARKVIND air purifier","category":"Air purifiers","url":"https://www.ikea.com/nl/en/p/starkvind-air-purifier-white-smart-50461942/","mode":"twin","introText":"Air purifier with particle filter: one knob on top - press for Auto / Off, turn (wheel) for speed 1-5, long press locks the controls. Auto follows the PM2.5 sensor (good 0-35, OK 36-85, not good 86+). Filter change: unplug, remove the front cover, swap the filter, refit, plug in, hold RESET 3 s. Manuals AA-2283689 / AA-2286065. Room air runs at 30x speed."},
 "model":"model.glb",

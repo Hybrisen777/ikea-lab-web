@@ -2,7 +2,7 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-28T23:53:22.5007404Z",
+"exported":"2026-10-30T02:47:45.6495556Z",
 "source":"Assets/Products/KALLBODA_70548063/KALLBODA_Twin.prefab",
 "product":{"id":"705.480.63","name":"KALLBODA dishwasher","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/kallboda-integrated-dishwasher-ikea-700-70548063/","mode":"twin","introText":"Integrated dishwasher, IKEA 700, 60 cm, with cutlery drawer. Keys on the top edge of the door, Time Beam on the floor. Manual AA-2576614 (simplified: basic settings, basket heights and water-hardness setting are not simulated). Programmes run at 90x speed."},
 "model":"model.glb",

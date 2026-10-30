@@ -1,7 +1,7 @@
 {
 "format":"ikea-lab-assembly","version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated)",
-"exported":"2026-10-28T23:55:54.6237920Z","source":"Assets/Products/MALM_29931596/product.json",
+"exported":"2026-10-30T02:52:13.9099352Z","source":"Assets/Products/MALM_29931596/product.json",
 "product":{"id":"299.315.96","name":"MALM bed","category":"Beds","url":"https://www.ikea.com/nl/en/p/malm-bed-frame-high-white-s29931596/","introText":"MALM bed frame, high, white, 140x200 cm, with LURÖY slatted bed bases. Assembly instructions AA-2558683-1 (simplified: headboard and frame end shown as one panel). Two people needed.","partsPage":"MALM_manual_p03","partsSummary":"8x Bolt,  2x Bracket,  8x Cam lock,  1x Centre beam,  1x Footboard,  1x Headboard,  2x Leg,  2x Rail,  8x Rscrew,  2x Side,  8x Slat holder,  2x Slats"},
 "model":"model.glb","rootName":"MALM_Bed","bakeRate":60,"tolerance":{"position":0.0005,"rotationDeg":0.15},"duration":50.45,
 "steps":[
