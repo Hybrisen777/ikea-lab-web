@@ -3,7 +3,7 @@
 // D = light max, hold D = medium. A pot produces steam, removed in proportion to the airflow (325/410/500/690 m³/h).
 // Grease filter: take out, clean, refit. The steam ParticleSystem is drawn by SteamEmitter (visual only).
 import * as THREE from 'three';
-import { TwinDevice, registerDevice, clamp01, moveTowards, roundToInt, ledHdr, uAxisAngle } from '../twin-core.js?v=c96caadc33';
+import { TwinDevice, registerDevice, clamp01, moveTowards, roundToInt, ledHdr, uAxisAngle } from '../twin-core.js?v=5c9ea96346';
 
 const f32 = Math.fround;
 const clock = (a, b) => String(a).padStart(2, '0') + ':' + String(b).padStart(2, '0');
@@ -28,7 +28,7 @@ class HoodController extends TwinDevice {
     const key = c.startsWith('key');
     if (key && !this.filterIn) { this.beep(500, 0.1, 0.15); this.flash('Refit the grease filter first'); return; }
     switch (c) {
-      case 'keyA': if (this.boost) this.endBoost(false); this.speed = this.speed === 0 ? 1 : (this.speed === 1 ? 0 : 1); this.key(); this.emit(this.speed === 0 ? 'fan:off' : 'fan:1'); break;
+      case 'keyA': { const running = this.level > 0; if (this.boost) this.endBoost(false); this.speed = running ? 0 : 1; this.key(); this.emit(this.speed === 0 ? 'fan:off' : 'fan:1'); break; }
       case 'keyB': if (this.boost) this.endBoost(false); this.speed = 2; this.key(); this.emit('fan:2'); break;
       case 'keyC': if (this.boost) this.endBoost(false); this.speed = 3; this.key(); this.emit('fan:3'); break;
       case 'keyCLong': this.boost = true; this.boostLeft = f32(this.boostMinutes * 60); this.beep(2000, 0.15, 0.2); this.emit('boost:on'); break;

@@ -2,9 +2,9 @@
 "format":"ikea-lab-twin",
 "version":1,
 "coordinates":"glTF: +Y up, right-handed, metres (Unity with X negated); component fields are raw Unity values",
-"exported":"2026-10-30T02:48:59.1505143Z",
+"exported":"2026-10-30T14:13:35.9087648Z",
 "source":"Assets/Products/KNUVEBO_70615632/KNUVEBO_Twin.prefab",
-"product":{"id":"706.156.32","name":"KNUVEBO extractor hood","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/knuvebo-wall-mounted-extractor-hood-ikea-500-black-70615632/","mode":"twin","introText":"Wall-mounted extractor hood, IKEA 500, 70 cm: four touch keys on the glass (A/B/C fan speeds, long C = 6-minute booster, D = light, long D = medium light), LED light, washable grease filter. Manual AA-2636603. Steam and the booster timer run at 10x speed."},
+"product":{"id":"706.156.32","name":"KNUVEBO extractor hood","category":"Kitchen appliances","url":"https://www.ikea.com/nl/en/p/knuvebo-wall-mounted-extractor-hood-ikea-500-black-70615632/","mode":"twin","introText":"Wall-mounted extractor hood, IKEA 500, 70 cm: four touch keys on the glass (A/B/C fan speeds, long C = 6-minute booster, D = light, long D = medium light), LED light, washable grease filter (no filter indicator: clean it every 2 months). Manuals AA-2636603 and AA-2636598. Steam and the booster timer run at 10x speed."},
 "model":"model.glb",
 "nodes":[
  {"uid":0,"name":"KNUVEBO_Twin","path":""},
@@ -53,8 +53,8 @@
  {"title":"Booster","text":"Hold C for about 1.5 s: the booster runs for 6 minutes (C flashes).","manualPage":"KNUV_manual_p5","conditions":[{"key":"fan","op":"equals","value":"boost"}]},
  {"title":"Back to speed 3","text":"Wait - after 6 minutes (36 s here) the hood returns to the previous speed by itself.","manualPage":"KNUV_manual_p5","conditions":[{"key":"","op":"event","value":"boost:end"},{"key":"fan","op":"equals","value":"3"}]},
  {"title":"Medium light","text":"Hold D for about 1.5 s: the light switches to medium intensity.","manualPage":"KNUV_manual_p5","conditions":[{"key":"light","op":"equals","value":"medium"}]},
- {"title":"Stop cooking and switch off","text":"Click the pot, then touch A until the motor is off, and touch D to switch the light off.","manualPage":"KNUV_manual_p5","conditions":[{"key":"cooking","op":"equals","value":"no"},{"key":"fan","op":"equals","value":"0"},{"key":"light","op":"equals","value":"off"}]},
- {"title":"Clean the grease filter","text":"With the motor off: click the grease filter to take it out, click again to clean it (dishwasher), click again to refit it.","manualPage":"KNUV_manual_p5","conditions":[{"key":"filter","op":"equals","value":"clean"}]}],
+ {"title":"Stop cooking and switch off","text":"Click the pot, then touch A (power) to switch the motor off, and touch D to switch the light off.","manualPage":"KNUV_manual_p5","conditions":[{"key":"cooking","op":"equals","value":"no"},{"key":"fan","op":"equals","value":"0"},{"key":"light","op":"equals","value":"off"}]},
+ {"title":"Clean the grease filter","text":"With the motor off: click the grease filter to take it out, click again to clean it (dishwasher), click again to refit it. The real hood has no filter indicator: clean the grease filter every 2 months.","manualPage":"KNUV_manual_p5","conditions":[{"key":"filter","op":"equals","value":"clean"}]}],
 "manualPages":[
  {"name":"KNUV_manual_p5","file":"manual/KNUV_manual_p5.png","width":641,"height":910}]
 }

@@ -2,7 +2,7 @@
 // parity_script.json + _unity_trace.json check it). Selection knob A, minute-minder knob B, thermostat knob C,
 // thermostat LED D (on while the elements heat), bottom-hinged door, fan, grill element, lamp, removable tray.
 // Cavity temperature is a first-order model at simSpeed x real time.
-import { TwinDevice, registerDevice, registerControl, moveTowards, roundToInt, uVec, uAxisAngle, srgbLerp, ledHdr } from '../twin-core.js?v=c96caadc33';
+import { TwinDevice, registerDevice, registerControl, moveTowards, roundToInt, uVec, uAxisAngle, srgbLerp, ledHdr } from '../twin-core.js?v=5c9ea96346';
 
 const f32 = Math.fround;
 const F = ['Off', 'ForcedAir', 'Conventional', 'Grill', 'GrillFan', 'ConvectionBake', 'Defrost', 'Light'];

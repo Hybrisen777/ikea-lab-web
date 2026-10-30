@@ -1,7 +1,7 @@
 // App-level UI of the web player (port of MenuUI + IssueReporter): main menu, product browser (search + type filter +
 // cards), in-scenario HUD (Report issue / Menu), pause menu (Esc), settings, issue report form (F8), loading, toasts.
 // The product list comes from index.json (written by Unity's web export), so new exports appear without code changes.
-import { settings, SPEEDS, speedLabel, asset } from './settings.js?v=c96caadc33';
+import { settings, SPEEDS, speedLabel, asset } from './settings.js?v=5c9ea96346';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
