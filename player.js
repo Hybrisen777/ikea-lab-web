@@ -3,9 +3,10 @@
 // callouts, click-to-identify, x-ray), OrbitCamera + ZoomInput. Menus and settings: menu.js / settings.js. Format: README.md.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { createStage, srgb } from './stage.js?v=5c9ea96346';
-import { settings, speedLabel, SPEEDS, asset, BASE_RATE } from './settings.js?v=5c9ea96346';
-import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=5c9ea96346';
+import { createStage, srgb } from './stage.js?v=44a2f85a5a';
+import { settings, speedLabel, SPEEDS, asset, BASE_RATE } from './settings.js?v=44a2f85a5a';
+import { buildShell, loadIndex, showMenu, showProducts, showLoading, hideLoading, attachScenario, modal } from './menu.js?v=44a2f85a5a';
+import { offerXR } from './xr/detect.js?v=44a2f85a5a';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -31,7 +32,7 @@ else {
   const entry = index.find(p => p.folder === folder);
   showLoading(entry?.name || folder);
   const useTwin = entry?.mode === 'twin' || (entry?.mode === 'both' && params.get('use') === '1');   // "both": the use phase
-  if (useTwin) await import('./twin.js?v=5c9ea96346').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
+  if (useTwin) await import('./twin.js?v=44a2f85a5a').then(m => m.runTwin(folder, entry)).catch(fail);              // digital twins
   else await run(folder, entry).catch(fail);
 }
 
@@ -51,17 +52,20 @@ async function run(dir, entry) {
   const { renderer, scene, fitShadow, stageMat } = createStage($('view'), sc.stage.background);
   scene.add(gltf.scene);
 
+  const stageMeshes = {};   // for WebXR (AR hides the floor)
   if (sc.stage.floor) {
     const f = sc.stage.floor.box;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(f.size[0], f.size[2]), stageMat(sc.stage.floor.color));
     m.rotation.x = -Math.PI / 2; m.position.set(f.center[0], f.center[1], f.center[2]); m.receiveShadow = true; scene.add(m);
+    stageMeshes.floor = m;
   }
   const addBox = (b, color, cast) => {
     const m = new THREE.Mesh(new THREE.BoxGeometry(...b.size), stageMat(color));
     m.position.set(...b.center); m.receiveShadow = true; m.castShadow = cast; scene.add(m);
+    return m;
   };
-  if (sc.stage.kitMat) addBox(sc.stage.kitMat.box, sc.stage.kitMat.color, false);
-  for (const o of sc.stage.obstacles || []) addBox(o.box, o.color, true);
+  if (sc.stage.kitMat) stageMeshes.kitMat = addBox(sc.stage.kitMat.box, sc.stage.kitMat.color, false);
+  stageMeshes.obstacles = (sc.stage.obstacles || []).map(o => addBox(o.box, o.color, true));
 
   // ---------------- parts ----------------
   const nodes = {}; gltf.scene.traverse(o => { if (o.name && !nodes[o.name]) nodes[o.name] = o; });
@@ -119,6 +123,11 @@ async function run(dir, entry) {
     if (key === 'xray') visualsDirty = true;
     if (key === 'autoCamera') st.userControlled = false;
   });
+  // scenario events (additive, nothing listens by default): the desktop path emits select / step / play / pause /
+  // stepComplete; the XR layer emits grab / place / snap / wrongPart / stepComplete through the same bus.
+  const events = { fns: {}, on(type, f) { (this.fns[type] ||= []).push(f); return () => this.off(type, f); },
+    off(type, f) { this.fns[type] = (this.fns[type] || []).filter(g => g !== f); },
+    emit(type, detail = {}) { for (const f of [...(this.fns[type] || []), ...(this.fns['*'] || [])]) try { f({ type, ...detail }); } catch (e) { console.error(e); } } };
   const dur = c => c >= 1 ? steps[c - 1].duration : 0;
   const start = c => c >= 1 ? steps[c - 1].start : 0;
   const atEnd = () => st.chapter === 0 || st.local >= dur(st.chapter) - 1e-4;
@@ -126,7 +135,7 @@ async function run(dir, entry) {
   const currentStep = () => st.chapter === 0 ? 0 : (atEnd() ? st.chapter : st.chapter - 1);
   let stepDirty = true;
 
-  function setChapter(c) { st.chapter = clamp(c, 0, S); st.local = 0; stepDirty = true; handBackToStep(); }
+  function setChapter(c) { st.chapter = clamp(c, 0, S); st.local = 0; stepDirty = true; handBackToStep(); events.emit('step', { step: st.chapter }); }
   const startForward = () => { st.reversing = false; st.playing = true; };
   const pause = () => { st.playing = false; st.reversing = false; };
   function play() { if (st.chapter === 0 || atEnd()) { next(); return; } st.reversing = false; st.playing = true; }
@@ -172,7 +181,7 @@ async function run(dir, entry) {
     const d = dur(st.chapter);
     if (!st.reversing && t >= d) {
       if (settings.continuous && st.chapter < S) { const over = t - d; setChapter(st.chapter + 1); t = Math.min(over, dur(st.chapter)); }
-      else { t = d; st.playing = false; }
+      else { t = d; st.playing = false; events.emit('stepComplete', { step: st.chapter, source: 'playback' }); }
     } else if (st.reversing && t <= 0) {
       if (settings.continuous && st.chapter > 1) { const over = -t; setChapter(st.chapter - 1); t = Math.max(0, dur(st.chapter) - over); }
       else { t = 0; st.playing = false; st.reversing = false; }
@@ -341,6 +350,7 @@ async function run(dir, entry) {
   function select(name) {
     if (name === st.selected) { if (name) { st.selFraming = true; st.userControlled = false; } return; }
     st.selected = name;
+    events.emit('select', { part: name });
     if (name) { $('selCallout').textContent = byName[name].label; st.selFraming = true; st.userControlled = false; }
     else st.selFraming = false;
     visualsDirty = true;
@@ -491,7 +501,8 @@ async function run(dir, entry) {
   });
 
   // ---------------- frame loop ----------------
-  function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+  const xr = { active: false, update: null, frame: null };   // set by xr/session.js while an immersive session runs
+  function resize() { if (xr.active) return; renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
   addEventListener('resize', resize); resize();
   const clock = new THREE.Clock();
   let wasPlaying = false;
@@ -503,13 +514,14 @@ async function run(dir, entry) {
     elx.style.transform = `translate(${x}px, ${y}px) translate(-50%, -100%)`;
     return { x, y };
   }
-  function frame() { tick(); requestAnimationFrame(frame); }
+  function frame(time, xrFrame) { xr.frame = xrFrame || null; tick(); }
   function tick(fixedDt) {   // one frame; fixedDt for QA without requestAnimationFrame (hidden tab)
     let dt = fixedDt ?? Math.min(clock.getDelta(), 0.1);
     if (modal.isOpen) dt = 0;   // like Unity's timeScale 0 while the pause menu / a form is open
     const time = clock.elapsedTime;
     advance(dt);
     if (st.playing && !wasPlaying) handBackToStep();   // pressing play always returns to the step's view
+    if (st.playing !== wasPlaying) events.emit(st.playing ? 'play' : 'pause', { step: st.chapter, reverse: st.reversing });
     wasPlaying = st.playing;
     if (stepDirty) refreshStep();
 
@@ -535,24 +547,25 @@ async function run(dir, entry) {
       litBox = new THREE.Box3().setFromCenterAndSize(new THREE.Vector3(...activeMove.target.center), new THREE.Vector3(...activeMove.target.size));
       for (const n of (activeMove.rendererParts || activeMove.parts)) if (byName[n]) litBox.union(partBox(byName[n]));
     }
-    lastFramed = updateCamera(dt, !!activeMove, litBox);
+    if (!xr.active) lastFramed = updateCamera(dt, !!activeMove, litBox);   // in XR the headset owns the camera
     camera.updateMatrixWorld();
 
     // callouts
     let mc = null;
-    if (activeMove) {
+    if (activeMove && !xr.active) {
       const b = new THREE.Box3(); for (const n of (activeMove.rendererParts || activeMove.parts)) if (byName[n]) b.union(partBox(byName[n]));
       if (!b.isEmpty()) mc = project(b, 0.02, ui.callout, 14);
     }
     ui.callout.classList.toggle('hidden', !mc);
     let sel = null;
-    if (st.selected) {
+    if (st.selected && !xr.active) {
       sel = project(partBox(byName[st.selected]), 0.01, ui.selCallout, 10);
       if (sel && mc && Math.abs(sel.y - mc.y) < 30 && Math.abs(sel.x - mc.x) < 160) project(partBox(byName[st.selected]), 0.01, ui.selCallout, 44);
     }
     ui.selCallout.classList.toggle('hidden', !sel);
 
     refreshTransport();
+    if (xr.active) xr.update(dt, xr.frame);
     renderer.render(scene, camera);
   }
   function autoLabel(m) {
@@ -600,7 +613,14 @@ async function run(dir, entry) {
     for (const ph of activeMove?.phases || []) if (g >= ph[0] - 1e-4 && g <= ph[1] + 1e-4) return ph[2];
     return activeMove ? 'move' : 'idle';
   }
-  window.player = { sc, st, parts, camera, orbit, tick, seekGlobal, play, pause, next, previous, select, get globalTime() { return globalTime(); },
+  window.player = { sc, st, parts, camera, orbit, tick, seekGlobal, play, pause, next, previous, select, events, get globalTime() { return globalTime(); },
     get activeMove() { return activeMove; }, get ghosts() { return parts.filter(p => p.ghosts?.some(g => g.visible)).map(p => p.name); }, get glow() { return [...glowParts]; } };
-  requestAnimationFrame(frame);
+  renderer.setAnimationLoop(frame);   // = requestAnimationFrame on the desktop; the XR frame loop in a session
+  offerXR({   // what the WebXR layer may use (xr/session.js); nothing here runs unless the user enters VR / AR
+    THREE, renderer, scene, camera, root: gltf.scene, stageMeshes, sc, parts, byName, pickables, steps, st, xr, events,
+    kitBox, finalBox, anchor, resize, applyPose, partBox, inRanges, setGhost, setGlow, select,
+    transport: { play, pause, next, previous, replay, restart, togglePlay, seekGlobal },
+    time: { globalTime, currentStep, atEnd, dur, start },
+    get activeMove() { return activeMove; }, dirty: () => { visualsDirty = true; stepDirty = true; },
+  });
 }
