@@ -2,7 +2,7 @@
 // page, and buttons. Drawn on a canvas texture; ray hits are turned into canvas pixels to find the button.
 // It hangs in the rig (reference space), to the left in front of the user, so it stays put in table / room mode.
 import * as THREE from 'three';
-import { asset } from '../settings.js?v=f5b4b6fea7';
+import { asset } from '../settings.js?v=bcd23e09e7';
 
 const W_M = 0.62, ASPECT = 0.62;                          // panel width in metres, height / width
 const BLUE = '#0058a3', YELLOW = '#ffdb00', INK = '#111', GREY = '#767676';
@@ -19,7 +19,7 @@ export function createPanel(xs, { px = 1024, actions }) {
   const pages = Object.fromEntries((host.sc.manualPages || []).map(p => [p.name, p.file]));
   const dir = new URLSearchParams(location.search).get('p');
   const images = {};
-  let hover = null, sig = '', note = '', noteColor = '#c0392b', hint = '';
+  let hover = null, sig = '', note = '', noteColor = '#c0392b', hint = '', pageRect = null, pageFile = null;   // the drawn manual page
 
   // buttons: id, label, x, y, w, h (design px)
   const BTN = [];
@@ -29,13 +29,14 @@ export function createPanel(xs, { px = 1024, actions }) {
     let x = 1024 - 28;
     const top = id => { x -= 120; BTN.push({ id, x, y: 24, w: 120, h: 52 }); x -= 12; };
     top('exit'); if (xs.mode === 'immersive-vr') top('floor'); if (xs.mirrorWanted) top('photo'); top('pin');
+    x -= 64; BTN.push({ id: 'help', x, y: 24, w: 64, h: 52 });           // "?" = the help card again
   }
 
   function label(id) {
     const st = host.st;
     return { prev: '◀◀', next: '▶▶', play: xs.mode2 === 'handson' ? (host.st.chapter === 0 ? 'Start' : 'Do it') : st.playing ? '❚❚' : '▶', restart: 'Restart', recenter: 'Recenter', exit: 'Exit',
       floor: xs.locomotion?.calibrating ? 'Cancel' : 'Floor',
-      photo: 'Photo', pin: api.pinned ? 'Pinned' : 'Follows',
+      photo: 'Photo', pin: api.pinned ? 'Pinned' : 'Follows', help: '?',
       mode: xs.mode2 === 'handson' ? 'Just watch' : 'Build it yourself',   // what it switches to
       scale: xs.scaleMode === 'table' ? 'Table' : 'Room' }[id];
   }
@@ -59,6 +60,7 @@ export function createPanel(xs, { px = 1024, actions }) {
     const st = host.st, S = host.steps.length, c = st.chapter, P = host.sc.product, T = host.time;
     const s = c > 0 ? host.steps[c - 1] : null;
     const pageName = c === 0 ? P.partsPage : s.manualPage, img = pageImage(pageName);
+    pageFile = pages[pageName] ? dir + '/' + pages[pageName] : null;
     const key = [api.pinned, c, st.playing, Math.round(T.globalTime() * 4), hover, xs.mode2, xs.scaleMode, note, hint, !!img, !!xs.locomotion?.calibrating].join('|');
     if (key === sig) return; sig = key;
     g.setTransform(u, 0, 0, u, 0, 0);
@@ -78,7 +80,11 @@ export function createPanel(xs, { px = 1024, actions }) {
       const bw = w - textW - 84, bh = h - 210, sc = Math.min(bw / img.naturalWidth, bh / img.naturalHeight);
       const iw = img.naturalWidth * sc, ih = img.naturalHeight * sc;
       g.drawImage(img, w - 28 - iw, 88, iw, ih);
-    }
+      pageRect = { x: w - 28 - iw, y: 88, w: iw, h: ih };              // tap it: the enlarged page (pageview.js)
+      if (hover === 'page') { g.strokeStyle = BLUE; g.lineWidth = 4; g.strokeRect(pageRect.x - 2, pageRect.y - 2, iw + 4, ih + 4); }
+      g.fillStyle = hover === 'page' ? BLUE : GREY; g.font = '700 18px system-ui, sans-serif'; g.textAlign = 'center';
+      g.fillText('Tap the page to enlarge', pageRect.x + iw / 2, Math.min(h - 128, 88 + ih + 24)); g.textAlign = 'start';
+    } else pageRect = null;
     // timeline
     const total = Math.max(host.sc.duration || 1, 1e-3), y = h - 120 + 0;
     g.fillStyle = '#ddd'; g.fillRect(28, y - 18, w - 56, 8);
@@ -107,7 +113,10 @@ export function createPanel(xs, { px = 1024, actions }) {
   /** Button under a ray hit (uv on the panel), or null. */
   function buttonAt(uv) {
     const x = uv.x * 1024, y = (1 - uv.y) * (H / u);
-    return BTN.find(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h)?.id || null;
+    const b = BTN.find(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h)?.id;
+    if (b) return b;
+    const r = pageRect;
+    return r && x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h ? 'page' : null;
   }
   /** Rig-local (= reference space) centre of a button - QA aims the emulated controller at it. */
   function buttonRef(id) {
@@ -117,6 +126,12 @@ export function createPanel(xs, { px = 1024, actions }) {
   }
   const api = {
     pinned: true, size: { w: W_M, h: W_M * ASPECT },
+    get pageFile() { return pageFile; },
+    pageRef() {   // QA: rig-local centre of the drawn page
+      const r = pageRect; if (!r) return null;
+      const p = new THREE.Vector3(((r.x + r.w / 2) / 1024 - 0.5) * W_M, (0.5 - (r.y + r.h / 2) / (H / u)) * W_M * ASPECT, 0.001);
+      return mesh.position.clone().add(p.applyQuaternion(mesh.quaternion));
+    },
     mesh, draw, place, buttonAt, buttonRef,
     setHover(id) { hover = id; }, setHint(t) { hint = t || ''; }, get hint() { return hint; },
     flash(text, color = '#c0392b') { note = text; noteColor = color; setTimeout(() => { if (note === text) note = ''; }, 2500); },

@@ -2,7 +2,7 @@
 // pinch, not on the panel) puts the product there, facing the user. Without hit-test (not granted / not supported)
 // or before the first hit the default placement stays (table height in front of the user). Recenter = place again.
 import * as THREE from 'three';
-import { applyRig } from './session.js?v=f5b4b6fea7';
+import { applyRig } from './session.js?v=bcd23e09e7';
 
 export function createAR(xs) {
   const { host, session } = xs, input = xs.input;
@@ -34,8 +34,12 @@ export function createAR(xs) {
   }
   xs.arPlaceAt = (p, frame) => placeAt(p, frame);         // QA
 
+  let hint = '';
+  const say = t => { if (t !== hint) { hint = t; if (xs.mode2 !== 'handson' || !t) xs.panel?.setHint(t); } };
   function update(dt, frame) {
-    if (!placing) return;
+    if (!placing) { say(''); return; }
+    say(reticle.visible ? 'Pinch to put the product on the yellow ring (look at the floor or a table to move it).'
+      : 'Look around slowly at the floor or a table - a yellow ring shows where the product will go.');
     if (source && frame) {
       const hits = frame.getHitTestResults(source);
       const pose = hits[0]?.getPose(host.renderer.xr.getReferenceSpace());

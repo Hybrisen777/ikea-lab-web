@@ -10,8 +10,8 @@
 // Structure for a physics engine later: beginHold / updateHold / endHold own the held part's pose; a physics step
 // would replace "stays where released" in endHold and the per-frame override in applyOverrides.
 import * as THREE from 'three';
-import { xrPrefs } from './quality.js?v=f5b4b6fea7';
-import { createTwins } from './twins.js?v=f5b4b6fea7';
+import { xrPrefs } from './quality.js?v=bcd23e09e7';
+import { createTwins } from './twins.js?v=bcd23e09e7';
 
 // Snap = attach radius: a carried part that comes within TOL_POS (+ 1/4 of its radius, at most TOL_POS_MAX) of its place
 // point attaches by itself (no release needed); big parts must also be turned within TOL_ROT of the target or of any

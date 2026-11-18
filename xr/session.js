@@ -2,7 +2,7 @@
 // The scene is not moved: a rig group carries the camera and the hands / controllers, and its transform puts the
 // product where the user should see it. Room = real scale on the floor in front of the user; Table = a miniature
 // (~0.8 m across) at table height 0.5 m in front. Exit restores everything the session changed.
-import { xrPrefs, applyQuality } from './quality.js?v=f5b4b6fea7';
+import { xrPrefs, applyQuality } from './quality.js?v=bcd23e09e7';
 
 const TABLE_HEIGHT = 0.8, TABLE_SIZE = 0.8, TABLE_GAP = 0.3, ROOM_GAP = 0.6;   // table gap 0.3: far edge ~1.1 m, in reach (hands, seated)
 let current = null;
@@ -35,11 +35,11 @@ export async function enterXR(mode, host) {
   const mark = what => trace.push({ what, s: +((performance.now() - t0) / 1000).toFixed(2), at: new Date().toISOString().slice(11, 19) });
   mark('click ' + mode);
   const restoreQuality = applyQuality(renderer, scene);
-  const manipModule = import('./manipulate.js?v=f5b4b6fea7'), inputModule = import('./input.js?v=f5b4b6fea7'), interactModule = import('./interact.js?v=f5b4b6fea7'), handsOnModule = import('./handson.js?v=f5b4b6fea7');
-  const arModule = mode === 'immersive-ar' ? import('./ar.js?v=f5b4b6fea7') : null;
-  const locoModule = mode === 'immersive-vr' ? import('./locomotion.js?v=f5b4b6fea7') : null;   // AR: the real room is the floor
+  const introModule = import('./intro.js?v=bcd23e09e7'), manipModule = import('./manipulate.js?v=bcd23e09e7'), inputModule = import('./input.js?v=bcd23e09e7'), interactModule = import('./interact.js?v=bcd23e09e7'), handsOnModule = import('./handson.js?v=bcd23e09e7');
+  const arModule = mode === 'immersive-ar' ? import('./ar.js?v=bcd23e09e7') : null;
+  const locoModule = mode === 'immersive-vr' ? import('./locomotion.js?v=bcd23e09e7') : null;   // AR: the real room is the floor
   const mq = new URLSearchParams(location.search).get('mirror');   // desktop (Quest Link): the VR view on the PC screen
-  const mirrorModule = mq === '1' || (mq !== '0' && !/OculusBrowser|Mobile|Android/.test(navigator.userAgent)) ? import('./mirror.js?v=f5b4b6fea7') : null;
+  const mirrorModule = mq === '1' || (mq !== '0' && !/OculusBrowser|Mobile|Android/.test(navigator.userAgent)) ? import('./mirror.js?v=bcd23e09e7') : null;
   const notice = startNotice(mode);
   const session = await navigator.xr.requestSession(mode, {
     requiredFeatures: ['local-floor'],
@@ -72,6 +72,7 @@ export async function enterXR(mode, host) {
     xs.interaction = (await interactModule).createInteraction(xs); xs.modules.push(xs.interaction);
     xs.handsOn = (await handsOnModule).createHandsOn(xs); xs.modules.push(xs.handsOn);
     xs.manipulation = (await manipModule).createManipulation(xs); xs.modules.push(xs.manipulation);   // two hands: move / size / turn
+    xs.intro = (await introModule).createIntro(xs); xs.modules.push(xs.intro);   // first-time help card
     if (arModule) { xs.ar = (await arModule).createAR(xs); xs.modules.push(xs.ar); }
     if (locoModule) { xs.locomotion = (await locoModule).createLocomotion(xs); xs.modules.push(xs.locomotion); }
     if (mirrorModule) { xs.mirror = (await mirrorModule).createMirror(xs); xs.modules.push(xs.mirror); }
@@ -98,7 +99,7 @@ export async function enterXR(mode, host) {
   if (r) {   // continue where the last session ended
     xs.rig.position.fromArray(r.rig[0]); xs.rig.quaternion.fromArray(r.rig[1]); xs.rig.scale.setScalar(r.rig[2]);
     xs.rig.updateMatrixWorld(true);
-    Object.assign(xs, { scaleMode: r.scaleMode, scale: r.scale, placed: true, panelPending: true });
+    Object.assign(xs, { scaleMode: r.scaleMode, scale: r.scale, placed: true, panelPending: true, introDone: true });
     if (r.mode2 === 'handson') xs.setMode?.('handson', { resume: true });
     mark('resumed');
   }
@@ -123,6 +124,7 @@ export async function enterXR(mode, host) {
     }
     if (!xs.placed && frame) guard('place', () => place(xs, frame));
     if (xs.panelPending && frame) guard('panel', () => placePanel(xs, frame));
+    guard('table', () => updateTable(xs));
     for (const m of xs.modules) if (!failed.has(m)) guard(m, () => m.update?.(dt, frame));
   };
   function guard(key, fn) {
@@ -136,6 +138,7 @@ export async function enterXR(mode, host) {
     if (xs.placed) resume = { mode, page: location.search, mode2: xs.mode2, scaleMode: xs.scaleMode, scale: xs.scale,
       rig: [xs.rig.position.toArray(), xs.rig.quaternion.toArray(), xs.rig.scale.x] };
     for (const m of xs.modules.reverse()) m.dispose?.();
+    if (xs.table) { scene.remove(xs.table.top, ...xs.table.legs); xs.table.top.geometry.dispose(); xs.table.top.material.dispose(); xs.table.legs[0].material.dispose(); xs.table = null; }
     host.xr.active = false; host.xr.update = null;
     xs.rig.remove(camera); if (saved.parent) saved.parent.add(camera);
     scene.remove(xs.rig);
@@ -176,6 +179,41 @@ function contentFrame(THREE, host) {
   return { c, yaw: Math.atan2(-F.x, -F.z), half, across };
 }
 
+/** VR Table mode: a real table under the miniature - a top under the content, its parts mat and work table, legs down
+ *  to the real floor - instead of the scene's 6 m floor floating at table height (hidden meanwhile). Built in the scene
+ *  (world), so it moves and scales with the content (two-hand gesture); the legs are re-fitted to the floor each frame.
+ *  Not in AR (the product stands on a real surface there) and not in Room mode. */
+const TABLE_MARGIN = 0.04, TABLE_THICK = 0.03, LEG = 0.04;   // real metres
+function updateTable(xs) {
+  const { THREE, scene, stageMeshes } = xs.host;
+  const on = xs.mode === 'immersive-vr' && xs.scaleMode === 'table' && xs.placed;
+  if (!xs.table && !on) return;
+  if (!xs.table) {
+    const box = xs.host.kitBox.clone().union(xs.host.finalBox);
+    for (const m of [stageMeshes.kitMat, ...(stageMeshes.obstacles || [])]) if (m) box.expandByObject(m);
+    const geo = new THREE.BoxGeometry(1, 1, 1), legMat = new THREE.MeshStandardMaterial({ color: 0x6f5b44, roughness: 0.85 });
+    const top = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0xd2b993, roughness: 0.8 }));
+    top.name = 'XRTable'; top.receiveShadow = true;
+    const legs = [0, 1, 2, 3].map(() => new THREE.Mesh(geo, legMat));
+    scene.add(top, ...legs);
+    xs.table = { top, legs, box };
+  }
+  const { top, legs, box } = xs.table;
+  top.visible = on; for (const l of legs) l.visible = on;
+  if (stageMeshes.floor && xs.mode === 'immersive-vr') stageMeshes.floor.visible = !on;
+  if (!on) return;
+  const k = xs.rig.scale.x, m = TABLE_MARGIN * k, t = TABLE_THICK * k, w = box.max.x - box.min.x + 2 * m, d = box.max.z - box.min.z + 2 * m;
+  const cx = (box.min.x + box.max.x) / 2, cz = (box.min.z + box.max.z) / 2;
+  top.scale.set(w, t, d); top.position.set(cx, -t / 2 - 0.001, cz); top.updateMatrixWorld();
+  const floorY = xs.rig.localToWorld(new THREE.Vector3(0, xs.floorY || 0, 0)).y, h = -t - floorY, l = LEG * k;
+  legs.forEach((leg, i) => {
+    leg.visible = h > l;
+    leg.scale.set(l, Math.max(h, 1e-4), l);
+    leg.position.set(cx + (i & 1 ? 1 : -1) * (w / 2 - 1.5 * l), -t - h / 2, cz + (i & 2 ? 1 : -1) * (d / 2 - 1.5 * l));
+    leg.updateMatrixWorld();
+  });
+}
+
 /** Rig transform so that the content centre lands in front of the user (head pose of this frame, reference space). */
 function place(xs, frame) {
   const { THREE, renderer } = xs.host;
@@ -191,6 +229,7 @@ function place(xs, frame) {
   const D = new THREE.Vector3(p.x - Math.sin(userYaw) * dist, (table ? TABLE_HEIGHT : 0) + (xs.floorY || 0), p.z - Math.cos(userYaw) * dist);
   applyRig(xs, { c, D, yaw: yaw - userYaw, s });
   xs.panel?.place(new THREE.Vector3(p.x, p.y, p.z), userYaw);
+  if (!xs.introDone && xs.intro) { xs.introDone = true; if (!xs.intro.seen) xs.intro.open(new THREE.Vector3(p.x, p.y, p.z), userYaw); }
 }
 /** Panel in front of the user (a resumed session keeps the rig, but the panel goes where the user looks now). */
 function placePanel(xs, frame) {

@@ -2,8 +2,9 @@
 // Selecting a part is the same as a mouse click on the desktop (host.select: glow + identify), its label shows on a
 // small tag above the part. Hover = a wire box around the part / a highlighted panel button.
 import * as THREE from 'three';
-import { createPanel } from './panel.js?v=f5b4b6fea7';
-import { xrPrefs } from './quality.js?v=f5b4b6fea7';
+import { createPanel } from './panel.js?v=bcd23e09e7';
+import { createPageView } from './pageview.js?v=bcd23e09e7';
+import { xrPrefs } from './quality.js?v=bcd23e09e7';
 
 const RAY_MAX = 8, YELLOW = 0xffd91a;
 
@@ -19,9 +20,15 @@ export function createInteraction(xs) {
     mode: () => xs.setMode?.(xs.mode2 === 'handson' ? 'watch' : 'handson'),
     floor: () => xs.locomotion?.calibrate(),
     pin: () => xs.panelPin(!panel.pinned),
+    help: () => {   // the first-time help card again, in front of the user
+      const f = new THREE.Vector3(0, 0, -1).applyQuaternion(host.camera.quaternion);
+      xs.intro?.open(host.camera.position.clone(), Math.atan2(-f.x, -f.z));
+    },
     photo: () => { xs.mirror?.shot(); xs.panel?.flash('Photo saved to Downloads (PC)', '#2e7d32'); },
+    page: () => view.visible && view.url && panel.pageFile && view.url.includes(panel.pageFile.split('/').pop()) ? view.hide() : view.open(panel.pageFile),
   } });
   xs.panel = panel;
+  const view = createPageView(xs); xs.pageView = view;                   // the enlarged manual page (tap the page on the panel)
 
   const ray = new THREE.Raycaster(); ray.far = RAY_MAX;
   const lines = {}, dots = {};
@@ -44,29 +51,36 @@ export function createInteraction(xs) {
   const drag = { left: null, right: null };
   const headLocal = () => host.camera.position.clone();                 // the XR camera's pose in the rig (= reference space)
   const handLocal = s => xs.rig.worldToLocal(s.grabPose.position.clone());
-  function face(p) {
+  // windows that move this way: the step panel and the enlarged page
+  const windows = [{ obj: panel.mesh, size: () => panel.size, tilt: -0.15, on: () => true },
+    { obj: view.group, size: () => view.size, tilt: 0, on: () => view.visible }];
+  const winOf = obj => windows.find(w => w.obj === obj || (w.obj.isGroup && obj.parent === w.obj));
+  function face(win, p) {
     const head = headLocal();
-    panel.mesh.position.copy(p);
-    panel.mesh.rotation.set(-0.15, Math.atan2(head.x - p.x, head.z - p.z), 0, 'YXZ');
-    panel.mesh.updateMatrixWorld(true);
+    win.obj.position.copy(p);
+    win.obj.rotation.set(win.tilt, Math.atan2(head.x - p.x, head.z - p.z), 0, 'YXZ');
+    win.obj.updateMatrixWorld(true);
   }
   function rayDragStart(side, s, h) {
     const hit = xs.rig.worldToLocal(h.point.clone()), hand = handLocal(s);
-    drag[side] = { mode: 'ray', dist: hit.distanceTo(xs.rig.worldToLocal(s.rayOrigin.clone())), off: panel.mesh.position.clone().sub(hit),
+    drag[side] = { win: h.win, mode: 'ray', dist: hit.distanceTo(xs.rig.worldToLocal(s.rayOrigin.clone())), off: h.win.obj.position.clone().sub(hit),
       reach0: hand.distanceTo(headLocal()) };
   }
-  function handDragStart(side, s) { drag[side] = { mode: 'hand', off: panel.mesh.position.clone().sub(handLocal(s)) }; }
+  function handDragStart(side, s, win) { drag[side] = { win, mode: 'hand', off: win.obj.position.clone().sub(handLocal(s)) }; }
   function dragUpdate(side, s) {
     const d = drag[side];
-    if (d.mode === 'hand') { face(handLocal(s).add(d.off)); return; }
+    if (d.mode === 'hand') { face(d.win, handLocal(s).add(d.off)); return; }
     const o = xs.rig.worldToLocal(s.rayOrigin.clone()), dir = xs.rig.worldToLocal(s.rayOrigin.clone().add(s.rayDirection)).sub(o).normalize();
     const dist = Math.max(0.25, d.dist + (handLocal(s).distanceTo(headLocal()) - d.reach0) * 4);   // push / pull, x4
-    face(o.addScaledVector(dir, dist).add(d.off));
+    face(d.win, o.addScaledVector(dir, dist).add(d.off));
   }
-  /** Pinch / grip with the hand within the panel's rectangle and up to 6 cm in front of / behind it. */
-  function handOnPanel(s) {
-    const q = panel.mesh.worldToLocal(s.grabPose.position.clone()), { w, h } = panel.size;
-    return Math.abs(q.z) < 0.06 && Math.abs(q.x) < w / 2 + 0.03 && Math.abs(q.y) < h / 2 + 0.03;
+  /** The window the hand pinches / grips on: within its rectangle and up to 6 cm in front of / behind it. */
+  function handOnWindow(s) {
+    return windows.find(win => {
+      if (!win.on()) return false;
+      const q = win.obj.worldToLocal(s.grabPose.position.clone()), { w, h } = win.size();
+      return Math.abs(q.z) < 0.06 && Math.abs(q.x) < w / 2 + 0.03 && Math.abs(q.y) < h / 2 + 0.03;
+    }) || null;
   }
   let follow = null;                                                     // unpinned: panel offset in the head-heading frame
   const headYaw = () => { const f = new THREE.Vector3(0, 0, -1).applyQuaternion(host.camera.quaternion); return Math.atan2(-f.x, -f.z); };
@@ -77,7 +91,7 @@ export function createInteraction(xs) {
   function followStep(dt) {
     if (!follow) rememberFollow();
     const want = headLocal().add(follow.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), headYaw()));
-    face(panel.mesh.position.clone().lerp(want, Math.min(1, (dt || 1 / 72) * 3)));
+    face(windows[0], panel.mesh.position.clone().lerp(want, Math.min(1, (dt || 1 / 72) * 3)));
   }
   xs.panelPin = pinned => { panel.pinned = pinned; follow = null; };
 
@@ -86,10 +100,16 @@ export function createInteraction(xs) {
     ray.set(s.rayOrigin, s.rayDirection);
     const k = xs.rig.scale.x;
     ray.far = RAY_MAX * k;
-    const hp = ray.intersectObject(panel.mesh, false)[0];
+    const targets = [panel.mesh]; if (view.visible) targets.push(view.close, view.page, view.back); if (xs.intro?.visible) targets.push(xs.intro.mesh);
+    const hp = ray.intersectObjects(targets, false)[0];
     const hits = ray.intersectObjects(host.pickables, false);
     const part = hits.find(h => h.object.visible);
-    if (hp && (!part || hp.distance <= part.distance)) return { kind: panel.buttonAt(hp.uv) ? 'button' : 'panel', id: panel.buttonAt(hp.uv), point: hp.point, distance: hp.distance };
+    if (hp && (!part || hp.distance <= part.distance)) {
+      if (hp.object === view.close) return { kind: 'button', id: 'viewClose', point: hp.point, distance: hp.distance };
+      if (hp.object === xs.intro?.mesh) return { kind: 'button', id: 'introClose', point: hp.point, distance: hp.distance };
+      const id = hp.object === panel.mesh ? panel.buttonAt(hp.uv) : null;
+      return { kind: id ? 'button' : 'panel', id, win: winOf(hp.object), point: hp.point, distance: hp.distance };
+    }
     if (part) return { kind: 'part', id: part.object.userData.part, point: part.point, distance: part.distance };
     return null;
   }
@@ -105,11 +125,13 @@ export function createInteraction(xs) {
         if (drag[side].mode === 'hand' ? s.grabPressed : s.selectPressed) {
           dragUpdate(side, s); line.visible = dot.visible = false; hover[side] = { kind: 'panel', dragging: true }; continue;
         }
-        drag[side] = null; follow = null;                               // unpinned: follows from where it was put
+        if (drag[side].win === windows[0]) follow = null;               // unpinned panel: follows from where it was put
+        drag[side] = null;
       }
       const h = hitOf(s); hover[side] = h;
-      if (s.justGrabbed && handOnPanel(s) && h?.kind !== 'button') {     // direct grab (a pinch aimed at a button presses it)
-        handDragStart(side, s); input.pulse(side, 0.3, 20); hover[side] = { kind: 'panel', dragging: true }; line.visible = dot.visible = false; continue;
+      const onWin = s.justGrabbed && h?.kind !== 'button' && handOnWindow(s);
+      if (onWin) {                                                       // direct grab (a pinch aimed at a button presses it)
+        handDragStart(side, s, onWin); input.pulse(side, 0.3, 20); hover[side] = { kind: 'panel', dragging: true }; line.visible = dot.visible = false; continue;
       }
       const k = xs.rig.scale.x, len = h ? h.distance : 1.2 * k;
       line.position.copy(s.rayOrigin);
@@ -119,12 +141,15 @@ export function createInteraction(xs) {
       if (h?.kind === 'button') btnHover = h.id;
       if (h?.kind === 'part') partHover = h.id;
       if (s.justSelected && h) {
-        if (h.kind === 'button') { panel.press(h.id); input.pulse(side, 0.3, 25); }
+        if (h.id === 'viewClose') { view.hide(); input.pulse(side, 0.3, 25); }
+        else if (h.id === 'introClose') { xs.intro.close(); input.pulse(side, 0.3, 25); }
+        else if (h.kind === 'button') { panel.press(h.id); input.pulse(side, 0.3, 25); }
         else if (h.kind === 'panel') { rayDragStart(side, s, h); input.pulse(side, 0.2, 15); }
         else if (h.kind === 'part' && !xs.handsOnSelect?.(side, h)) { host.select(h.id); input.pulse(side, 0.3, 25); }
       }
     }
-    if (!panel.pinned && !drag.left && !drag.right) followStep(dt);
+    if (!panel.pinned && drag.left?.win !== windows[0] && drag.right?.win !== windows[0]) followStep(dt);
+    if (view.visible && panel.pageFile) view.show(panel.pageFile);      // the enlarged page follows the shown step
     panel.setHover(btnHover);
     if (partHover) { wire.box.copy(host.partBox(host.byName[partHover])); wire.visible = true; } else wire.visible = false;
     const sel = host.st.selected;
@@ -134,7 +159,7 @@ export function createInteraction(xs) {
 
   function dispose() {
     for (const side of ['left', 'right']) { host.scene.remove(lines[side], dots[side]); lines[side].geometry.dispose(); dots[side].geometry.dispose(); }
-    host.scene.remove(wire, tag.sprite); tag.dispose(); panel.dispose();
+    host.scene.remove(wire, tag.sprite); tag.dispose(); panel.dispose(); view.dispose();
   }
   return { update, dispose, panel, hitOf, hover };
 }
