@@ -2,7 +2,7 @@
 // MicrowaveDoor.cs (keep in sync; parity_script.json + _unity_trace.json check it). Stop, Power, Memo, Steam, +/-,
 // Jet Defrost, Start, Door; cooking only with the door closed. The idle display shows the wall clock (a fixed 12:00
 // during parity traces, like Unity). Display timing uses Time.time (absolute), here ctx.time.
-import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, uVec, uAxisAngle } from '../twin-core.js?v=3fac0b060a';
+import { TwinDevice, registerDevice, registerControl, clamp, moveTowards, uVec, uAxisAngle } from '../twin-core.js?v=f88a31c767';
 
 const f32 = Math.fround;
 const FUNCTIONS = ['Stop', 'Power', 'Memo', 'Steam', 'Plus', 'Minus', 'JetDefrost', 'Start', 'DoorOpen'];

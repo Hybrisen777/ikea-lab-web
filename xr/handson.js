@@ -10,8 +10,8 @@
 // Structure for a physics engine later: beginHold / updateHold / endHold own the held part's pose; a physics step
 // would replace "stays where released" in endHold and the per-frame override in applyOverrides.
 import * as THREE from 'three';
-import { xrPrefs } from './quality.js?v=3fac0b060a';
-import { createTwins } from './twins.js?v=3fac0b060a';
+import { xrPrefs } from './quality.js?v=f88a31c767';
+import { createTwins } from './twins.js?v=f88a31c767';
 
 // Snap = attach radius: a carried part that comes within TOL_POS (+ 1/4 of its radius, at most TOL_POS_MAX) of its place
 // point attaches by itself (no release needed); big parts must also be turned within TOL_ROT of the target or of any
@@ -253,13 +253,19 @@ export function createHandsOn(xs) {
     const now = g() + 1e-4;
     return host.steps.some(st => st.moves.some(m => (m.moving || m.parts).includes(name) && m.spans[m.spans.length - 1][1] <= now));
   }
+  /** Part to grab at a side's hand: the nearest in reach, but a WANTED one (glowing = still to place in this move, or an
+   *  identical copy of one) beats any other - on the miniature table the reach zones of small parts overlap, and a
+   *  pinch next to a dowel must not pick up the rail beside it. */
   function nearestPart(s) {
-    let best = null, bd = Infinity;
+    let best = null, bd = Infinity, bw = false;
     const k = xs.rig.scale.x, pt = s.grabPose.position;
+    const free = [...targets.keys()].filter(n => !locked.has(n)).map(n => host.byName[n]);
     for (const p of host.parts) {
       if (!grabbable(p)) continue;
       const d = host.partBox(p).distanceToPoint(pt), lim = (isSmall(p) ? REACH_SMALL : REACH) * k;
-      if (d <= lim && d < bd) { bd = d; best = p; }
+      if (d > lim) continue;
+      const w = free.includes(p) || free.some(t => swappable(p, t));
+      if ((w && !bw) || (w === bw && d < bd)) { bd = d; best = p; bw = w; }
     }
     return best;
   }

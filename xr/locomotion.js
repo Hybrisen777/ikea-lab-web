@@ -1,9 +1,9 @@
 // Moving around in VR (not in AR: there the real room is the floor). Moves the rig, never the scene.
-//   Floor spots (the beginner way, hands and controllers): four glowing circles on the floor around the product - point
-//     at one and pinch / pull the trigger: you stand there, turned towards the product.
+//   Floor spots (controllers): four glowing circles on the floor around the product - point at one and pull the
+//     trigger: you stand there, turned towards the product.
 //   Controller: thumbstick forward = free aim (arc + ring on the real floor), release = teleport; left / right = snap turn 30°.
-//   Hands: only the floor spots, and only when a pinch is RELEASED still on the same spot within 1.2 s without having
-//     grabbed a part - a pinch meant for a part or the panel never moves you (no free aiming with hands).
+//   Hands: no teleport (a pinch is always a grab or a panel press); session.js puts the product on a table in front of a
+//     hands-only user instead (2026-11-18, before: spot on release of a short empty pinch - conflicted with grabbing).
 //   Floor button (panel): the next pinch / trigger with the hand or controller held on the real floor sets the floor
 //     height (xs.setFloor) - Chrome over Quest Link guesses local-floor and puts it too low.
 // Everything is in the reference space (rig local, real metres, floor y = xs.floorY), so it works the same in Room and
@@ -11,7 +11,7 @@
 import * as THREE from 'three';
 
 const SPEED = 6, G = 9.8, MAX_DIST = 8, STEPS = 48, DT = 0.03, TURN = Math.PI / 6;
-const AIM_ON = -0.6, AIM_OFF = 0.3, TURN_ON = 0.7, TURN_OFF = 0.3, HAND_TAP = 1.2;
+const AIM_ON = -0.6, AIM_OFF = 0.3, TURN_ON = 0.7, TURN_OFF = 0.3;
 const FLOOR_ABOVE = { controller: 0.04, hand: 0.03, joints: 0.01 };   // grab point above the floor when touching it
 const FLOOR_HINT = 'Touch the real floor with your hand or controller and pinch / pull the trigger.';
 const SPOT_GAP = 0.7, SPOT_R = 0.28, SPOT_HIDE = 0.6;   // spots 0.7 m outside the product box; the one you stand on hides
@@ -106,13 +106,16 @@ export function createLocomotion(xs) {
     return true;
   }
 
+  // hands-only: no floor teleport at all (a pinch is a grab or a panel press, never a jump) - with hands the product
+  // comes to a table in front of the user instead (session.js), so walking is not needed; spots only for controllers
+  const controllers = () => Object.values(input.sides).some(s => s.type === 'controller');
   function layoutSpots() {
     const { c, hx, hz } = content(), h = head(), q = rig.quaternion.clone().invert();
     const dirs = [[0, 0, 1, hz], [1, 0, 0, hx], [0, 0, -1, hz], [-1, 0, 0, hx]];   // world +Z (front), +X, -Z, -X
     dirs.forEach(([x, y, z, half], i) => {
       const d = new THREE.Vector3(x, y, z).applyQuaternion(q).setY(0).normalize();
       spots[i].position.copy(c).addScaledVector(d, half + SPOT_GAP).setY(floor() + 0.005);
-      spots[i].visible = !h || Math.hypot(spots[i].position.x - h.x, spots[i].position.z - h.z) > SPOT_HIDE;
+      spots[i].visible = controllers() && (!h || Math.hypot(spots[i].position.x - h.x, spots[i].position.z - h.z) > SPOT_HIDE);
     });
   }
   /** Floor spot on a side's ray, if it is nearer than what the ray already hits (panel / part). */
@@ -153,16 +156,7 @@ export function createLocomotion(xs) {
       const s = input.sides[side], st = state[side];
       const spot = st.aim ? null : spotOn(side, s);
       if (spot != null) hovered.add(spot);
-      if (s.type === 'hand') {                                        // hands: spot on release of a short, empty pinch
-        if (s.justSelected) st.tap = spot != null ? { spot, t: performance.now() } : null;
-        if (st.tap && xs.holding?.[side]) st.tap = null;                // the pinch grabbed a part
-        if (st.tap && s.justDeselected) {
-          const ok = spot === st.tap.spot && performance.now() - st.tap.t < HAND_TAP * 1000;
-          st.tap = null;
-          if (ok) goToSpot(spot);
-        }
-        st.aim = false; continue;
-      }
+      if (s.type === 'hand') { st.tap = null; st.aim = false; continue; }   // hands never teleport (see controllers())
       if (spot != null && s.justSelected) { if (goToSpot(spot)) input.pulse(side, 0.5, 30); continue; }
       if (s.type === 'controller') {
         if (!st.aim && s.stick.y < AIM_ON) st.aim = true;

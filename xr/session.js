@@ -2,9 +2,9 @@
 // The scene is not moved: a rig group carries the camera and the hands / controllers, and its transform puts the
 // product where the user should see it. Room = real scale on the floor in front of the user; Table = a miniature
 // (~0.8 m across) at table height 0.5 m in front. Exit restores everything the session changed.
-import { xrPrefs, applyQuality } from './quality.js?v=3fac0b060a';
+import { xrPrefs, applyQuality } from './quality.js?v=f88a31c767';
 
-const TABLE_HEIGHT = 0.8, TABLE_SIZE = 0.8, TABLE_GAP = 0.5, ROOM_GAP = 0.6;
+const TABLE_HEIGHT = 0.8, TABLE_SIZE = 0.8, TABLE_GAP = 0.3, ROOM_GAP = 0.6;   // table gap 0.3: far edge ~1.1 m, in reach (hands, seated)
 let current = null;
 // The last session's state (same page): re-entering continues there - Quest Link ends the session whenever the headset
 // is taken off. Rig pose (teleports, turns, scale), Watch / Hands-on, the shown step and move (the player keeps them).
@@ -35,11 +35,11 @@ export async function enterXR(mode, host) {
   const mark = what => trace.push({ what, s: +((performance.now() - t0) / 1000).toFixed(2), at: new Date().toISOString().slice(11, 19) });
   mark('click ' + mode);
   const restoreQuality = applyQuality(renderer, scene);
-  const inputModule = import('./input.js?v=3fac0b060a'), interactModule = import('./interact.js?v=3fac0b060a'), handsOnModule = import('./handson.js?v=3fac0b060a');
-  const arModule = mode === 'immersive-ar' ? import('./ar.js?v=3fac0b060a') : null;
-  const locoModule = mode === 'immersive-vr' ? import('./locomotion.js?v=3fac0b060a') : null;   // AR: the real room is the floor
+  const inputModule = import('./input.js?v=f88a31c767'), interactModule = import('./interact.js?v=f88a31c767'), handsOnModule = import('./handson.js?v=f88a31c767');
+  const arModule = mode === 'immersive-ar' ? import('./ar.js?v=f88a31c767') : null;
+  const locoModule = mode === 'immersive-vr' ? import('./locomotion.js?v=f88a31c767') : null;   // AR: the real room is the floor
   const mq = new URLSearchParams(location.search).get('mirror');   // desktop (Quest Link): the VR view on the PC screen
-  const mirrorModule = mq === '1' || (mq !== '0' && !/OculusBrowser|Mobile|Android/.test(navigator.userAgent)) ? import('./mirror.js?v=3fac0b060a') : null;
+  const mirrorModule = mq === '1' || (mq !== '0' && !/OculusBrowser|Mobile|Android/.test(navigator.userAgent)) ? import('./mirror.js?v=f88a31c767') : null;
   const notice = startNotice(mode);
   const session = await navigator.xr.requestSession(mode, {
     requiredFeatures: ['local-floor'],
@@ -109,6 +109,15 @@ export async function enterXR(mode, host) {
   host.xr.update = (dt, frame) => {
     if (firstFrame) { firstFrame = false; mark('first frame'); }
     if (!handSeen) for (const s of Object.values(xs.input.sides)) if (s.type === 'hand' && s.joints !== undefined) { handSeen = true; mark('hand, joint poses: ' + s.joints); }
+    if (!xs.handsTable && mode === 'immersive-vr' && Object.values(xs.input.sides).some(s => s.type === 'hand')) {
+      // hands (no controllers): the product comes to a table in front of the user - everything within reach, seated
+      // or standing, no walking / teleport needed (once per session; the panel's Room / Table still switches)
+      xs.handsTable = true;
+      if (xs.scaleMode !== 'table' && !Object.values(xs.input.sides).some(s => s.type === 'controller')) {
+        xs.scaleMode = 'table'; xs.placed = false;
+        xs.panel?.flash('Hands: the product is on a table in front of you - everything within reach', '#2e7d32');
+      }
+    }
     if (!xs.placed && frame) guard('place', () => place(xs, frame));
     if (xs.panelPending && frame) guard('panel', () => placePanel(xs, frame));
     for (const m of xs.modules) if (!failed.has(m)) guard(m, () => m.update?.(dt, frame));
