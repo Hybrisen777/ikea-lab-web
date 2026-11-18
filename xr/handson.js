@@ -10,8 +10,8 @@
 // Structure for a physics engine later: beginHold / updateHold / endHold own the held part's pose; a physics step
 // would replace "stays where released" in endHold and the per-frame override in applyOverrides.
 import * as THREE from 'three';
-import { xrPrefs } from './quality.js?v=898da37aef';
-import { createTwins } from './twins.js?v=898da37aef';
+import { xrPrefs } from './quality.js?v=f5b4b6fea7';
+import { createTwins } from './twins.js?v=f5b4b6fea7';
 
 // Snap = attach radius: a carried part that comes within TOL_POS (+ 1/4 of its radius, at most TOL_POS_MAX) of its place
 // point attaches by itself (no release needed); big parts must also be turned within TOL_ROT of the target or of any
@@ -412,7 +412,7 @@ export function createHandsOn(xs) {
     for (const side of ['left', 'right']) {
       const s = input.sides[side];
       if (held[side] && (s.type === 'none' || s.justReleased)) endHold(side);
-      else if (!held[side] && s.justGrabbed && s.type !== 'none') {
+      else if (!held[side] && s.justGrabbed && s.type !== 'none' && !xs.interaction?.hover[side]?.dragging) {   // not the panel
         let p = nearestPart(s), far = false;
         if (!p && xrPrefs.distanceGrab) { p = rayPart(side); far = !!p; }      // distance grab: the part on the ray
         if (p && !Object.values(held).some(h => h?.part === p)) beginHold(side, p, far);

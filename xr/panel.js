@@ -2,7 +2,7 @@
 // page, and buttons. Drawn on a canvas texture; ray hits are turned into canvas pixels to find the button.
 // It hangs in the rig (reference space), to the left in front of the user, so it stays put in table / room mode.
 import * as THREE from 'three';
-import { asset } from '../settings.js?v=898da37aef';
+import { asset } from '../settings.js?v=f5b4b6fea7';
 
 const W_M = 0.62, ASPECT = 0.62;                          // panel width in metres, height / width
 const BLUE = '#0058a3', YELLOW = '#ffdb00', INK = '#111', GREY = '#767676';
@@ -25,15 +25,17 @@ export function createPanel(xs, { px = 1024, actions }) {
   const BTN = [];
   const row = (y, items) => { let x = 28; for (const [id, w] of items) { BTN.push({ id, x, y, w, h: 64 }); x += w + 12; } };
   row(H / u - 92, [['prev', 92], ['play', 120], ['next', 92], ['restart', 130], ['mode', 220], ['scale', 120], ['recenter', 140]]);
-  BTN.push({ id: 'exit', x: 1024 - 28 - 120, y: 24, w: 120, h: 52 });
-  if (xs.mode === 'immersive-vr') BTN.push({ id: 'floor', x: 1024 - 28 - 120 - 12 - 120, y: 24, w: 120, h: 52 });   // set the real floor height
-  if (xs.mirrorWanted) BTN.push({ id: 'photo', x: 1024 - 28 - 3 * 120 - 2 * 12, y: 24, w: 120, h: 52 });   // PC: screenshot of the view
+  {   // top right, right to left: Exit, Floor (VR: set the real floor height), Photo (PC: screenshot), Pin
+    let x = 1024 - 28;
+    const top = id => { x -= 120; BTN.push({ id, x, y: 24, w: 120, h: 52 }); x -= 12; };
+    top('exit'); if (xs.mode === 'immersive-vr') top('floor'); if (xs.mirrorWanted) top('photo'); top('pin');
+  }
 
   function label(id) {
     const st = host.st;
     return { prev: '◀◀', next: '▶▶', play: xs.mode2 === 'handson' ? (host.st.chapter === 0 ? 'Start' : 'Do it') : st.playing ? '❚❚' : '▶', restart: 'Restart', recenter: 'Recenter', exit: 'Exit',
       floor: xs.locomotion?.calibrating ? 'Cancel' : 'Floor',
-      photo: 'Photo',
+      photo: 'Photo', pin: api.pinned ? 'Pinned' : 'Follows',
       mode: xs.mode2 === 'handson' ? 'Just watch' : 'Build it yourself',   // what it switches to
       scale: xs.scaleMode === 'table' ? 'Table' : 'Room' }[id];
   }
@@ -57,7 +59,7 @@ export function createPanel(xs, { px = 1024, actions }) {
     const st = host.st, S = host.steps.length, c = st.chapter, P = host.sc.product, T = host.time;
     const s = c > 0 ? host.steps[c - 1] : null;
     const pageName = c === 0 ? P.partsPage : s.manualPage, img = pageImage(pageName);
-    const key = [c, st.playing, Math.round(T.globalTime() * 4), hover, xs.mode2, xs.scaleMode, note, hint, !!img, !!xs.locomotion?.calibrating].join('|');
+    const key = [api.pinned, c, st.playing, Math.round(T.globalTime() * 4), hover, xs.mode2, xs.scaleMode, note, hint, !!img, !!xs.locomotion?.calibrating].join('|');
     if (key === sig) return; sig = key;
     g.setTransform(u, 0, 0, u, 0, 0);
     const w = 1024, h = H / u;
@@ -113,11 +115,13 @@ export function createPanel(xs, { px = 1024, actions }) {
     const p = new THREE.Vector3((uvx - 0.5) * W_M, (uvy - 0.5) * W_M * ASPECT, 0.001);
     return mesh.position.clone().add(p.applyQuaternion(mesh.quaternion));
   }
-  return {
+  const api = {
+    pinned: true, size: { w: W_M, h: W_M * ASPECT },
     mesh, draw, place, buttonAt, buttonRef,
     setHover(id) { hover = id; }, setHint(t) { hint = t || ''; }, get hint() { return hint; },
     flash(text, color = '#c0392b') { note = text; noteColor = color; setTimeout(() => { if (note === text) note = ''; }, 2500); },
     press(id) { actions[id]?.(); sig = ''; },
     dispose() { xs.rig.remove(mesh); tex.dispose(); mesh.geometry.dispose(); mesh.material.dispose(); },
   };
+  return api;
 }
