@@ -2,7 +2,7 @@
 // The scene is not moved: a rig group carries the camera and the hands / controllers, and its transform puts the
 // product where the user should see it. Room = real scale on the floor in front of the user; Table = a miniature
 // (~0.8 m across) at table height 0.5 m in front. Exit restores everything the session changed.
-import { xrPrefs, applyQuality } from './quality.js?v=f88a31c767';
+import { xrPrefs, applyQuality } from './quality.js?v=898da37aef';
 
 const TABLE_HEIGHT = 0.8, TABLE_SIZE = 0.8, TABLE_GAP = 0.3, ROOM_GAP = 0.6;   // table gap 0.3: far edge ~1.1 m, in reach (hands, seated)
 let current = null;
@@ -35,11 +35,11 @@ export async function enterXR(mode, host) {
   const mark = what => trace.push({ what, s: +((performance.now() - t0) / 1000).toFixed(2), at: new Date().toISOString().slice(11, 19) });
   mark('click ' + mode);
   const restoreQuality = applyQuality(renderer, scene);
-  const inputModule = import('./input.js?v=f88a31c767'), interactModule = import('./interact.js?v=f88a31c767'), handsOnModule = import('./handson.js?v=f88a31c767');
-  const arModule = mode === 'immersive-ar' ? import('./ar.js?v=f88a31c767') : null;
-  const locoModule = mode === 'immersive-vr' ? import('./locomotion.js?v=f88a31c767') : null;   // AR: the real room is the floor
+  const manipModule = import('./manipulate.js?v=898da37aef'), inputModule = import('./input.js?v=898da37aef'), interactModule = import('./interact.js?v=898da37aef'), handsOnModule = import('./handson.js?v=898da37aef');
+  const arModule = mode === 'immersive-ar' ? import('./ar.js?v=898da37aef') : null;
+  const locoModule = mode === 'immersive-vr' ? import('./locomotion.js?v=898da37aef') : null;   // AR: the real room is the floor
   const mq = new URLSearchParams(location.search).get('mirror');   // desktop (Quest Link): the VR view on the PC screen
-  const mirrorModule = mq === '1' || (mq !== '0' && !/OculusBrowser|Mobile|Android/.test(navigator.userAgent)) ? import('./mirror.js?v=f88a31c767') : null;
+  const mirrorModule = mq === '1' || (mq !== '0' && !/OculusBrowser|Mobile|Android/.test(navigator.userAgent)) ? import('./mirror.js?v=898da37aef') : null;
   const notice = startNotice(mode);
   const session = await navigator.xr.requestSession(mode, {
     requiredFeatures: ['local-floor'],
@@ -71,6 +71,7 @@ export async function enterXR(mode, host) {
     xs.input = (await inputModule).createInput(xs); xs.modules.push(xs.input);   // before setSession: sees every 'connected'
     xs.interaction = (await interactModule).createInteraction(xs); xs.modules.push(xs.interaction);
     xs.handsOn = (await handsOnModule).createHandsOn(xs); xs.modules.push(xs.handsOn);
+    xs.manipulation = (await manipModule).createManipulation(xs); xs.modules.push(xs.manipulation);   // two hands: move / size / turn
     if (arModule) { xs.ar = (await arModule).createAR(xs); xs.modules.push(xs.ar); }
     if (locoModule) { xs.locomotion = (await locoModule).createLocomotion(xs); xs.modules.push(xs.locomotion); }
     if (mirrorModule) { xs.mirror = (await mirrorModule).createMirror(xs); xs.modules.push(xs.mirror); }
@@ -115,7 +116,9 @@ export async function enterXR(mode, host) {
       xs.handsTable = true;
       if (xs.scaleMode !== 'table' && !Object.values(xs.input.sides).some(s => s.type === 'controller')) {
         xs.scaleMode = 'table'; xs.placed = false;
-        xs.panel?.flash('Hands: the product is on a table in front of you - everything within reach', '#2e7d32');
+        xs.walkHint = 'Bigger / move it: pinch with BOTH hands in empty space and pull apart. Move the panel: pinch it and drag.';
+        xs.panel?.flash('Pinch with both hands in empty space and pull apart: bigger / move it', '#2e7d32');
+        if (xs.mode2 !== 'handson') xs.panel?.setHint(xs.walkHint);
       }
     }
     if (!xs.placed && frame) guard('place', () => place(xs, frame));

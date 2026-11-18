@@ -2,8 +2,8 @@
 // Selecting a part is the same as a mouse click on the desktop (host.select: glow + identify), its label shows on a
 // small tag above the part. Hover = a wire box around the part / a highlighted panel button.
 import * as THREE from 'three';
-import { createPanel } from './panel.js?v=f88a31c767';
-import { xrPrefs } from './quality.js?v=f88a31c767';
+import { createPanel } from './panel.js?v=898da37aef';
+import { xrPrefs } from './quality.js?v=898da37aef';
 
 const RAY_MAX = 8, YELLOW = 0xffd91a;
 
@@ -34,6 +34,21 @@ export function createInteraction(xs) {
   const wire = new THREE.Box3Helper(new THREE.Box3(), YELLOW); wire.visible = false; host.scene.add(wire);
   const tag = makeTag(); host.scene.add(tag.sprite);
   const hover = { left: null, right: null };
+  // Moving the panel like a window in the Meta OS: pinch / trigger on the panel (not on a button) and drag; it keeps its
+  // distance along the ray and turns to face the user. Rig-local (= real metres), so it works in Room and Table.
+  const drag = { left: null, right: null };
+  function dragStart(side, s, h) {
+    const local = xs.rig.worldToLocal(h.point.clone());
+    drag[side] = { dist: h.distance, off: panel.mesh.position.clone().sub(local) };
+  }
+  function dragUpdate(side, s) {
+    const d = drag[side];
+    const p = xs.rig.worldToLocal(s.rayOrigin.clone().addScaledVector(s.rayDirection, d.dist)).add(d.off);
+    panel.mesh.position.copy(p);
+    const head = xs.rig.worldToLocal(host.renderer.xr.getCamera().getWorldPosition(new THREE.Vector3()));
+    panel.mesh.rotation.set(-0.15, Math.atan2(head.x - p.x, head.z - p.z), 0, 'YXZ');
+    panel.mesh.updateMatrixWorld(true);
+  }
 
   /** Nearest thing on a side's ray: { kind: 'button'|'panel'|'part', id, point, distance } or null. */
   function hitOf(s) {
@@ -54,7 +69,11 @@ export function createInteraction(xs) {
       const s = input.sides[side], line = lines[side], dot = dots[side];
       const usable = s.type !== 'none' && !(xs.holding?.[side]);
       line.visible = dot.visible = usable;
-      if (!usable) { hover[side] = null; continue; }
+      if (!usable) { hover[side] = null; drag[side] = null; continue; }
+      if (drag[side]) {
+        if (s.selectPressed) { dragUpdate(side, s); line.visible = dot.visible = false; hover[side] = { kind: 'panel', dragging: true }; continue; }
+        drag[side] = null;
+      }
       const h = hitOf(s); hover[side] = h;
       const k = xs.rig.scale.x, len = h ? h.distance : 1.2 * k;
       line.position.copy(s.rayOrigin);
@@ -65,6 +84,7 @@ export function createInteraction(xs) {
       if (h?.kind === 'part') partHover = h.id;
       if (s.justSelected && h) {
         if (h.kind === 'button') { panel.press(h.id); input.pulse(side, 0.3, 25); }
+        else if (h.kind === 'panel') { dragStart(side, s, h); input.pulse(side, 0.2, 15); }
         else if (h.kind === 'part' && !xs.handsOnSelect?.(side, h)) { host.select(h.id); input.pulse(side, 0.3, 25); }
       }
     }
@@ -98,8 +118,8 @@ function makeTag() {
         g.fillStyle = '#ffdb00'; g.beginPath(); g.roundRect((512 - w) / 2, 14, w, 68, 12); g.fill();
         g.fillStyle = '#111'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 256, 50); tex.needsUpdate = true;
       }
-      sprite.position.set((box.min.x + box.max.x) / 2, box.max.y + 0.03 * k, (box.min.z + box.max.z) / 2);
-      sprite.scale.set(0.3 * k, 0.056 * k, 1); sprite.visible = true;
+      sprite.position.set((box.min.x + box.max.x) / 2, box.max.y + 0.02 * k, (box.min.z + box.max.z) / 2);
+      sprite.scale.set(0.12 * k, 0.0225 * k, 1); sprite.visible = true;   // 12 cm wide (real), any scale
     },
     hide() { sprite.visible = false; },
     dispose() { tex.dispose(); sprite.material.dispose(); },

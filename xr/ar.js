@@ -2,7 +2,7 @@
 // pinch, not on the panel) puts the product there, facing the user. Without hit-test (not granted / not supported)
 // or before the first hit the default placement stays (table height in front of the user). Recenter = place again.
 import * as THREE from 'three';
-import { applyRig } from './session.js?v=f88a31c767';
+import { applyRig } from './session.js?v=898da37aef';
 
 export function createAR(xs) {
   const { host, session } = xs, input = xs.input;

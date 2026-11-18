@@ -2,7 +2,7 @@
 // page, and buttons. Drawn on a canvas texture; ray hits are turned into canvas pixels to find the button.
 // It hangs in the rig (reference space), to the left in front of the user, so it stays put in table / room mode.
 import * as THREE from 'three';
-import { asset } from '../settings.js?v=f88a31c767';
+import { asset } from '../settings.js?v=898da37aef';
 
 const W_M = 0.62, ASPECT = 0.62;                          // panel width in metres, height / width
 const BLUE = '#0058a3', YELLOW = '#ffdb00', INK = '#111', GREY = '#767676';
@@ -96,9 +96,10 @@ export function createPanel(xs, { px = 1024, actions }) {
 
   /** Put the panel to the left in front of the user (reference space = rig local), facing them. */
   function place(head, yaw) {
+    const table = xs.scaleMode === 'table';                          // the miniature is right in front: the panel goes beside it
     const f = new THREE.Vector3(-Math.sin(yaw), 0, -Math.cos(yaw)), left = new THREE.Vector3(-Math.cos(yaw), 0, Math.sin(yaw));
-    mesh.position.copy(head).addScaledVector(f, 0.55).addScaledVector(left, 0.42).setY(Math.max(0.95, head.y - 0.3));
-    mesh.rotation.set(-0.22, yaw + 0.42, 0, 'YXZ');
+    mesh.position.copy(head).addScaledVector(f, table ? 0.4 : 0.55).addScaledVector(left, table ? 0.72 : 0.42).setY(Math.max(0.95, head.y - (table ? 0.15 : 0.3)));
+    mesh.rotation.set(-0.22, yaw + (table ? 1.0 : 0.42), 0, 'YXZ');
     mesh.updateMatrixWorld(true);
   }
   /** Button under a ray hit (uv on the panel), or null. */
