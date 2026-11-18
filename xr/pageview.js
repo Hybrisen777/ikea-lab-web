@@ -3,7 +3,7 @@
 // High-resolution pages (manual_hd/, rendered from IKEA's PDFs) are used when they exist, else the normal page. The
 // window follows the shown step, moves like the panel (interact.js: ray drag / direct grab) and closes with its ✕.
 import * as THREE from 'three';
-import { asset } from '../settings.js?v=1724c84f69';
+import { asset } from '../settings.js?v=b476928068';
 
 const H = 0.8, FRAME = 0.015;                                   // page height, white frame (real metres)
 
@@ -53,10 +53,17 @@ export function createPageView(xs) {
     hdList(folder).then(list => { if (want === src) load(list.has(file) ? asset(hd) : asset(src), list.has(file) ? asset(src) : null); });
   }
   /** Open in front of the user (head pose in the rig), facing them. */
-  function open(src) {
+  /** Open it beside `anchor` (the step panel: { obj, w }) on the panel's right, at its distance - opening where the user
+   *  looks put it into / behind the panel they had just tapped (2026-11-18, seen in AR) - else in front of the user. */
+  function open(src, anchor = null) {
     show(src);
     const head = host.camera.position.clone(), f = new THREE.Vector3(0, 0, -1).applyQuaternion(host.camera.quaternion).setY(0).normalize();
-    const p = head.clone().addScaledVector(f, 0.7).setY(Math.max(1.0, head.y - 0.1));
+    let p = head.clone().addScaledVector(f, 0.7).setY(Math.max(1.0, head.y - 0.1));
+    if (anchor) {
+      const right = new THREE.Vector3(1, 0, 0).applyQuaternion(anchor.obj.quaternion).setY(0).normalize();
+      p = anchor.obj.position.clone().addScaledVector(right, anchor.w / 2 + H * aspect / 2 + 0.06);
+      p.y = Math.max(anchor.obj.position.y, 0.9 + H / 2);                // bottom edge above a table-height miniature
+    }
     group.position.copy(p);
     group.rotation.set(0, Math.atan2(head.x - p.x, head.z - p.z), 0, 'YXZ');
     group.visible = true; group.updateMatrixWorld(true);

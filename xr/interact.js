@@ -2,9 +2,9 @@
 // Selecting a part is the same as a mouse click on the desktop (host.select: glow + identify), its label shows on a
 // small tag above the part. Hover = a wire box around the part / a highlighted panel button.
 import * as THREE from 'three';
-import { createPanel } from './panel.js?v=1724c84f69';
-import { createPageView } from './pageview.js?v=1724c84f69';
-import { xrPrefs } from './quality.js?v=1724c84f69';
+import { createPanel } from './panel.js?v=b476928068';
+import { createPageView } from './pageview.js?v=b476928068';
+import { xrPrefs } from './quality.js?v=b476928068';
 
 const RAY_MAX = 8, YELLOW = 0xffd91a;
 
@@ -25,7 +25,8 @@ export function createInteraction(xs) {
       xs.intro?.open(host.camera.position.clone(), Math.atan2(-f.x, -f.z));
     },
     photo: () => { xs.mirror?.shot(); xs.panel?.flash('Photo saved to Downloads (PC)', '#2e7d32'); },
-    page: () => view.visible && view.url && panel.pageFile && view.url.includes(panel.pageFile.split('/').pop()) ? view.hide() : view.open(panel.pageFile),
+    page: () => view.visible && view.url && panel.pageFile && view.url.includes(panel.pageFile.split('/').pop()) ? view.hide()
+      : view.open(panel.pageFile, { obj: panel.mesh, w: panel.size.w }),   // beside the panel, never behind it
   } });
   xs.panel = panel;
   const view = createPageView(xs); xs.pageView = view;                   // the enlarged manual page (tap the page on the panel)

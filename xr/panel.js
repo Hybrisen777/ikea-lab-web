@@ -2,7 +2,7 @@
 // page, and buttons. Drawn on a canvas texture; ray hits are turned into canvas pixels to find the button.
 // It hangs in the rig (reference space), to the left in front of the user, so it stays put in table / room mode.
 import * as THREE from 'three';
-import { asset } from '../settings.js?v=1724c84f69';
+import { asset } from '../settings.js?v=b476928068';
 
 const W_M = 0.62, ASPECT = 0.62;                          // panel width in metres, height / width
 const BLUE = '#0058a3', YELLOW = '#ffdb00', INK = '#111', GREY = '#767676';
@@ -75,15 +75,21 @@ export function createPanel(xs, { px = 1024, actions }) {
     g.font = '400 24px system-ui, sans-serif'; g.fillStyle = '#333';
     const body = c === 0 ? `In the box: ${P.partsSummary || ''}` : s.text;
     wrap(body, textW, g.font, 7).forEach((l, i) => g.fillText(l, 28, 190 + i * 32));
-    if (note || hint) { g.fillStyle = note ? noteColor : GREY; g.font = (note ? '700' : '400') + ' 22px system-ui, sans-serif'; g.fillText(note || hint, 28, h - 140); }
+    // bottom bands (design px): hint / note just above the timeline bar, in the text column only (1-2 lines); the manual
+    // page and its caption end above them - before 2026-11-18 the page reached under the timeline bar
+    if (note || hint) {
+      g.fillStyle = note ? noteColor : GREY; g.font = (note ? '700' : '400') + ' 22px system-ui, sans-serif';
+      const lines = wrap(note || hint, textW, g.font, 2);
+      lines.forEach((l, i) => g.fillText(l, 28, h - 150 - (lines.length - 1 - i) * 28));
+    }
     if (img) {   // manual page, right half
-      const bw = w - textW - 84, bh = h - 210, sc = Math.min(bw / img.naturalWidth, bh / img.naturalHeight);
+      const bw = w - textW - 84, bh = h - 88 - 200, sc = Math.min(bw / img.naturalWidth, bh / img.naturalHeight);
       const iw = img.naturalWidth * sc, ih = img.naturalHeight * sc;
       g.drawImage(img, w - 28 - iw, 88, iw, ih);
       pageRect = { x: w - 28 - iw, y: 88, w: iw, h: ih };              // tap it: the enlarged page (pageview.js)
       if (hover === 'page') { g.strokeStyle = BLUE; g.lineWidth = 4; g.strokeRect(pageRect.x - 2, pageRect.y - 2, iw + 4, ih + 4); }
       g.fillStyle = hover === 'page' ? BLUE : GREY; g.font = '700 18px system-ui, sans-serif'; g.textAlign = 'center';
-      g.fillText('Tap the page to enlarge', pageRect.x + iw / 2, Math.min(h - 128, 88 + ih + 24)); g.textAlign = 'start';
+      g.fillText('Tap the page to enlarge', pageRect.x + iw / 2, 88 + ih + 26); g.textAlign = 'start';   // <= h - 174, above the bar
     } else pageRect = null;
     // timeline
     const total = Math.max(host.sc.duration || 1, 1e-3), y = h - 120 + 0;
